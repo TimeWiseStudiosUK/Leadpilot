@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '../../lib/supabase/server'
+import LeadAge from '../../components/LeadAge'
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }) {
   const supabase = await createClient()
 
   const {
@@ -21,10 +22,25 @@ export default async function Dashboard() {
 
   if (!membership) redirect('/onboarding')
 
+  const params = await searchParams
+
+  const search = typeof params?.search === 'string'
+    ? params.search.trim()
+    : ''
+
+  const score = ['HOT', 'WARM', 'COLD'].includes(params?.score)
+    ? params.score
+    : ''
+
+  const status = ['NEW', 'CONTACTED', 'WON', 'LOST'].includes(params?.status)
+    ? params.status
+    : ''
+
+  const sort = params?.sort === 'oldest' ? 'oldest' : 'newest'
+
   const [
     { data: org },
     { data: assistant },
-    { data: leads },
   ] = await Promise.all([
     supabase
       .from('organizations')
@@ -38,19 +54,45 @@ export default async function Dashboard() {
       .eq('organization_id', membership.organization_id)
       .limit(1)
       .maybeSingle(),
-
-    supabase
-      .from('leads')
-      .select('*')
-      .eq('organization_id', membership.organization_id)
-      .is('archived_at', null)
-      .order('created_at', { ascending: false })
-      .limit(20),
   ])
 
+  let leadsQuery = supabase
+    .from('leads')
+    .select('*')
+    .eq('organization_id', membership.organization_id)
+    .is('archived_at', null)
+
+  if (search) {
+    const safeSearch = search
+      .replace(/[%(),]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 100)
+
+    if (safeSearch) {
+      leadsQuery = leadsQuery.or(
+        `name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,phone.ilike.%${safeSearch}%,postcode.ilike.%${safeSearch}%,service.ilike.%${safeSearch}%,enquiry.ilike.%${safeSearch}%,property_type.ilike.%${safeSearch}%`
+      )
+    }
+  }
+
+  if (score) {
+    leadsQuery = leadsQuery.eq('score', score)
+  }
+
+  if (status) {
+    leadsQuery = leadsQuery.eq('status', status)
+  }
+
+  leadsQuery = leadsQuery
+    .order('created_at', { ascending: sort === 'oldest' })
+    .limit(50)
+
+  const { data: leads } = await leadsQuery
+
   const activeLeads = leads || []
-  const hot = activeLeads.filter(x => x.score === 'HOT').length
-  const warm = activeLeads.filter(x => x.score === 'WARM').length
+  const hot = activeLeads.filter((lead) => lead.score === 'HOT').length
+  const warm = activeLeads.filter((lead) => lead.score === 'WARM').length
 
   return (
     <main className="app">
@@ -82,9 +124,7 @@ export default async function Dashboard() {
           <div>
             <small>DASHBOARD</small>
             <h1>{org?.name || 'Your business'}</h1>
-            <p>
-              Your AI assistant is capturing and qualifying enquiries.
-            </p>
+            <p>Your AI assistant is capturing and qualifying enquiries.</p>
           </div>
 
           <span className="online">● Online</span>
@@ -116,104 +156,229 @@ export default async function Dashboard() {
           <div className="panel-head">
             <div>
               <h2>Recent leads</h2>
-              
             </div>
 
             <div
-  style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 8,
-    marginLeft: 'auto',
-  }}
->
-  <Link
-    href="/dashboard/leads/new"
-    style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 6,
-      padding: '7px 11px',
-      borderRadius: 7,
-      background: '#111827',
-      color: '#fff',
-      fontSize: 13,
-      fontWeight: 600,
-      textDecoration: 'none',
-      whiteSpace: 'nowrap',
-    }}
-  >
-    + Add Lead
-  </Link>
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: 8,
+                marginLeft: 'auto',
+              }}
+            >
+              <Link
+                href="/dashboard/leads/new"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '7px 11px',
+                  borderRadius: 7,
+                  background: '#111827',
+                  color: '#fff',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                + Add Lead
+              </Link>
 
-  <Link
-    href="/dashboard/leads/archived"
-    style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 6,
-      padding: '7px 11px',
-      border: '1px solid #dbe1e8',
-      borderRadius: 7,
-      background: '#fff',
-      color: '#475569',
-      fontSize: 13,
-      fontWeight: 600,
-      textDecoration: 'none',
-      whiteSpace: 'nowrap',
-    }}
-  >
-    Archived leads →
-  </Link>
-</div>
+              <Link
+                href="/dashboard/leads/archived"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '7px 11px',
+                  border: '1px solid #dbe1e8',
+                  borderRadius: 7,
+                  background: '#fff',
+                  color: '#475569',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Archived leads →
+              </Link>
+            </div>
           </div>
+
+          <form
+            method="GET"
+            style={{
+              display: 'flex',
+              gap: 8,
+              flexWrap: 'wrap',
+              padding: '0 24px 18px',
+              borderBottom: '1px solid #eef1f5',
+            }}
+          >
+            <input
+              type="search"
+              name="search"
+              defaultValue={search}
+              placeholder="Search leads..."
+              style={{
+                flex: '1 1 220px',
+                minWidth: 180,
+                padding: '9px 11px',
+                border: '1px solid #dbe1e8',
+                borderRadius: 7,
+                fontSize: 13,
+                outline: 'none',
+              }}
+            />
+
+            <select
+              name="score"
+              defaultValue={score}
+              style={{
+                padding: '9px 11px',
+                border: '1px solid #dbe1e8',
+                borderRadius: 7,
+                background: '#fff',
+                color: '#475569',
+                fontSize: 13,
+              }}
+            >
+              <option value="">All scores</option>
+              <option value="HOT">Hot</option>
+              <option value="WARM">Warm</option>
+              <option value="COLD">Cold</option>
+            </select>
+
+            <select
+              name="status"
+              defaultValue={status}
+              style={{
+                padding: '9px 11px',
+                border: '1px solid #dbe1e8',
+                borderRadius: 7,
+                background: '#fff',
+                color: '#475569',
+                fontSize: 13,
+              }}
+            >
+              <option value="">All statuses</option>
+              <option value="NEW">New</option>
+              <option value="CONTACTED">Contacted</option>
+              <option value="WON">Won</option>
+              <option value="LOST">Lost</option>
+            </select>
+
+            <select
+              name="sort"
+              defaultValue={sort}
+              style={{
+                padding: '9px 11px',
+                border: '1px solid #dbe1e8',
+                borderRadius: 7,
+                background: '#fff',
+                color: '#475569',
+                fontSize: 13,
+              }}
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+
+            <button
+              type="submit"
+              style={{
+                padding: '9px 13px',
+                border: '1px solid #111827',
+                borderRadius: 7,
+                background: '#111827',
+                color: '#fff',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Apply
+            </button>
+
+            {(search || score || status || sort === 'oldest') && (
+              <a
+                href="/dashboard"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '9px 13px',
+                  border: '1px solid #dbe1e8',
+                  borderRadius: 7,
+                  background: '#fff',
+                  color: '#475569',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Clear
+              </a>
+            )}
+          </form>
 
           {activeLeads.length ? (
             <div className="table">
-              <div className="thead">
+              <div
+                className="thead"
+                style={{
+                  gridTemplateColumns: '1.25fr 1.8fr .65fr .75fr 1fr',
+                }}
+              >
                 <span>Customer</span>
                 <span>Enquiry</span>
                 <span>Score</span>
                 <span>Status</span>
+                <span>Received</span>
               </div>
 
-              {activeLeads.map(l => (
+              {activeLeads.map((lead) => (
                 <Link
-                  href={`/dashboard/leads/${l.id}`}
+                  href={`/dashboard/leads/${lead.id}`}
                   className="tr"
-                  key={l.id}
+                  key={lead.id}
+                  style={{
+                    gridTemplateColumns: '1.25fr 1.8fr .65fr .75fr 1fr',
+                  }}
                 >
                   <span>
-                    <b>{l.name || 'Unknown'}</b>
+                    <b>{lead.name || 'Unknown'}</b>
                     <small>
-                      {l.email ||
-                        l.phone ||
-                        l.postcode ||
+                      {lead.email ||
+                        lead.phone ||
+                        lead.postcode ||
                         'Details being collected'}
                     </small>
                   </span>
 
                   <span>
-                    {l.service ||
-                      l.enquiry ||
-                      'General enquiry'}
+                    {lead.service || lead.enquiry || 'General enquiry'}
                   </span>
 
                   <span>
-                    <em className={l.score.toLowerCase()}>
-                      {l.score}
+                    <em className={lead.score.toLowerCase()}>
+                      {lead.score}
                     </em>
                   </span>
 
-                  <span>{l.status}</span>
+                  <span>{lead.status}</span>
+
+                  <LeadAge timestamp={lead.created_at} />
                 </Link>
               ))}
             </div>
           ) : (
             <div className="empty">
-              No active leads yet. Open your assistant and send a
-              test enquiry.
+              {search || score || status
+                ? 'No leads match your current search or filters.'
+                : 'No leads yet. Open your assistant and send a test enquiry.'}
             </div>
           )}
         </section>
