@@ -1,0 +1,14 @@
+{
+  "name": "leadpilot-ai",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {"dev":"next dev","build":"next build","start":"next start","lint":"next lint"},
+  "dependencies": {
+    "@supabase/ssr": "latest",
+    "@supabase/supabase-js": "latest",
+    "next": "15.5.0",
+    "openai": "latest",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  }
+}
