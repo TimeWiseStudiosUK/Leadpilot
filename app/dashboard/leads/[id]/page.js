@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '../../../../lib/supabase/server'
+import LeadNotes from '../../../../components/LeadNotes'
 import LeadStatusSelect from '../../../../components/LeadStatusSelect'
 
 export default async function LeadDetails({ params }) {
@@ -147,7 +148,9 @@ export default async function LeadDetails({ params }) {
           </section>
         </div>
 
-        <section className="card conversationCard">
+            <LeadNotes leadId={lead.id} />
+
+<section className="card conversationCard">
           <div className="sectionHeading">
             <div>
               <h2>Conversation history</h2>
