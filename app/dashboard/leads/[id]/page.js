@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import LeadActions from '../../../../components/LeadActions'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '../../../../lib/supabase/server'
 import LeadNotes from '../../../../components/LeadNotes'
@@ -86,6 +87,11 @@ export default async function LeadDetails({ params }) {
             {lead.score || 'COLD'}
           </div>
         </div>
+
+        <LeadActions
+          leadId={lead.id}
+          archived={Boolean(lead.archived_at)}
+        />
 
         <div className="leadDetailGrid">
           <section className="card">
