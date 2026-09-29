@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '../../../../lib/supabase/server'
 
-const allowedStatuses = ['NEW', 'CONTACTED', 'QUALIFIED', 'WON', 'LOST']
+const allowedStatuses = ['NEW', 'CONTACTED', 'WON', 'LOST']
 
 export async function PATCH(request) {
   try {

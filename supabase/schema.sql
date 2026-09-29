@@ -47,7 +47,7 @@ create table if not exists public.leads (
   summary text,
   notes text,
   score text not null default 'COLD' check (score in ('HOT','WARM','COLD')),
-  status text not null default 'NEW' check (status in ('NEW','CONTACTED','QUALIFIED','WON','LOST')),
+  status text not null default 'NEW' check (status in ('NEW','CONTACTED','WON','LOST')),
   source text not null default 'AI_ASSISTANT',
   created_at timestamptz not null default now()
 );

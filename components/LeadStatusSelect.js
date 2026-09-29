@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-const statuses = ['NEW', 'CONTACTED', 'QUALIFIED', 'WON', 'LOST']
+const statuses = ['NEW', 'CONTACTED', 'WON', 'LOST']
 
 export default function LeadStatusSelect({ leadId, initialStatus }) {
   const [status, setStatus] = useState(initialStatus || 'NEW')
