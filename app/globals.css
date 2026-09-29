@@ -156,3 +156,28 @@
     max-width: 92%;
   }
 }
+.statusSelect {
+  min-width: 160px;
+  padding: 9px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: white;
+  color: #101828;
+  font: inherit;
+  font-weight: 600;
+}
+
+.statusSelect:disabled {
+  opacity: 0.6;
+}
+
+.savingStatus {
+  margin-left: 10px;
+  color: #667085;
+}
+
+.statusError {
+  display: block;
+  margin-top: 6px;
+  color: #b42318;
+}

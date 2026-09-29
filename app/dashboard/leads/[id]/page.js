@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '../../../../lib/supabase/server'
+import LeadStatusSelect from '../../../../components/LeadStatusSelect'
 
 export default async function LeadDetails({ params }) {
   const { id } = await params
@@ -133,7 +134,7 @@ export default async function LeadDetails({ params }) {
 
               <div>
                 <small>Status</small>
-                <strong>{lead.status || 'NEW'}</strong>
+                <LeadStatusSelect leadId={lead.id} initialStatus={lead.status || 'NEW'} />
               </div>
             </div>
 
