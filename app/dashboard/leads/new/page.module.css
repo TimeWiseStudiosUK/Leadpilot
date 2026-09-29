@@ -1,0 +1,233 @@
+.page {
+  min-height: 100vh;
+  padding: 40px 24px 70px;
+}
+
+.container {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.topBar {
+  margin-bottom: 30px;
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 22px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: #111827;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.eyebrow {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.heading h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: -.03em;
+}
+
+.heading p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, .04);
+}
+
+.cardHeader {
+  margin-bottom: 24px;
+}
+
+.cardHeader h2 {
+  margin: 0 0 5px;
+  color: #111827;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.cardHeader p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.field,
+.fullField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fullField {
+  margin-top: 20px;
+}
+
+.field label,
+.fullField label {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.field label span {
+  color: #dc2626;
+}
+
+.field input,
+.field select,
+.fullField textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.field input,
+.field select {
+  height: 46px;
+  padding: 0 13px;
+}
+
+.fullField textarea {
+  min-height: 110px;
+  padding: 12px 13px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.fullField textarea:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, .08);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.cancel,
+.save {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 650;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cancel {
+  color: #374151;
+  background: #fff;
+  border: 1px solid #d1d5db;
+}
+
+.cancel:hover {
+  background: #f9fafb;
+}
+
+.save {
+  color: #fff;
+  background: #111827;
+  border: 1px solid #111827;
+}
+
+.save:hover {
+  background: #1f2937;
+}
+
+.save:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.error {
+  padding: 13px 15px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 28px 16px 50px;
+  }
+
+  .heading h1 {
+    font-size: 28px;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 13px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .cancel,
+  .save {
+    width: 100%;
+  }
+}
