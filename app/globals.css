@@ -181,3 +181,159 @@
   margin-top: 6px;
   color: #b42318;
 }
+
+
+/* AI Handover */
+.aiHandoverCard {
+  margin-top: 24px;
+}
+
+.aiHandoverCard .handoverGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.aiHandoverCard .handoverStatus {
+  padding: 18px 20px;
+  border: 1px solid #e3e7ee;
+  border-radius: 12px;
+  background: #fafbfc;
+}
+
+.aiHandoverCard .handoverStatus small,
+.aiHandoverCard .handoverSummary small,
+.aiHandoverCard .handoverAction small {
+  display: block;
+  margin-bottom: 8px;
+  color: #68758a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.aiHandoverCard .handoverStatus strong {
+  display: block;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.aiHandoverCard .handoverStatus .leadScore {
+  display: inline-flex;
+  width: fit-content;
+  margin: 0;
+}
+
+.aiHandoverCard .readyYes {
+  color: #16803c;
+}
+
+.aiHandoverCard .readyNo {
+  color: #68758a;
+}
+
+.aiHandoverCard .handoverSummary {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border-top: 1px solid #e5e8ee;
+}
+
+.aiHandoverCard .handoverSummary p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.aiHandoverCard .handoverAction {
+  margin-top: 4px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  background: #f5f7fa;
+}
+
+.aiHandoverCard .handoverAction p {
+  margin: 0;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+@media (max-width: 700px) {
+  .aiHandoverCard .handoverGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Contact actions */
+.contactActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid #e3e7ee;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.contactActions small {
+  display: block;
+  margin-bottom: 5px;
+  color: #68758a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.contactActions p {
+  margin: 0;
+  color: #68758a;
+  font-size: 14px;
+}
+
+.contactActionButtons {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.contactButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  padding: 10px 18px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.contactButton:hover {
+  opacity: 0.85;
+}
+
+.callButton {
+  color: #ffffff;
+  background: #16803c;
+}
+
+.emailButton {
+  color: #ffffff;
+  background: #2563eb;
+}
+
+@media (max-width: 700px) {
+  .contactActions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .contactActionButtons {
+    width: 100%;
+  }
+
+  .contactButton {
+    flex: 1;
+  }
+}

@@ -155,6 +155,77 @@ export default async function LeadDetails({ params }) {
           </section>
         </div>
 
+            <section className="card aiHandoverCard">
+              <div className="sectionHeading">
+                <div>
+                  <h2>AI Handover</h2>
+                  <p>Key information and recommended next action for this lead.</p>
+                </div>
+              </div>
+
+              <div className="handoverGrid">
+                <div className="handoverStatus">
+                  <small>Lead score</small>
+                  <strong className={`leadScore ${lead.score ? lead.score.toLowerCase() : 'unscored'}`}>
+                    {lead.score || 'Unscored'}
+                  </strong>
+                </div>
+
+                <div className="handoverStatus">
+                  <small>Ready to contact</small>
+                  <strong className={lead.ready_to_contact ? 'readyYes' : 'readyNo'}>
+                    {lead.ready_to_contact ? 'Yes' : 'Not yet'}
+                  </strong>
+                </div>
+
+                <div className="handoverStatus">
+                  <small>Status</small>
+                  <strong>{lead.status || 'NEW'}</strong>
+                </div>
+              </div>
+
+              <div className="handoverAction">
+                <small>Recommended next action</small>
+                <p>
+                  {lead.status === 'WON'
+                    ? 'Lead converted. No further sales action required.'
+                    : lead.status === 'LOST'
+                      ? 'Lead marked as lost. No further sales action required.'
+                      : lead.ready_to_contact
+                        ? lead.score === 'HOT'
+                          ? 'Contact the customer as soon as possible to discuss the enquiry.'
+                          : 'Contact the customer to discuss the enquiry and agree the next step.'
+                        : 'Continue qualification before contacting the customer.'}
+                </p>
+              </div>
+
+              {lead.ready_to_contact && lead.status !== 'WON' && lead.status !== 'LOST' && (
+                <div className="contactActions">
+                  <div>
+                    <small>Contact customer</small>
+                    <p>Take the next step with this lead.</p>
+                  </div>
+
+                  <div className="contactActionButtons">
+                    {lead.phone && (
+                      <a className="contactButton callButton" href={`tel:${lead.phone}`}>
+                        Call
+                      </a>
+                    )}
+
+                    {lead.email && (
+                      <a
+                        className="contactButton emailButton"
+                        href={`mailto:${lead.email}`}
+                      >
+                        Email
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </section>
+
             <LeadNotes leadId={lead.id} />
 
 <section className="card conversationCard">
