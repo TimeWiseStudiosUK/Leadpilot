@@ -309,9 +309,36 @@ export default function Onboarding() {
           ))}
         </div>
 
-        <label>
-          HOT lead criteria
-          <span className="hint">
+        <div
+          style={{
+            marginTop: 28,
+            marginBottom: 8,
+            fontSize: 18,
+            fontWeight: 700,
+          }}
+        >
+          Lead scoring
+        </div>
+
+        <label
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            marginTop: 18,
+          }}
+        >
+          <span style={{ fontWeight: 700 }}>
+            HOT lead criteria
+          </span>
+          <span
+            className="hint"
+            style={{
+              display: 'block',
+              marginTop: -2,
+              lineHeight: 1.45,
+            }}
+          >
             What makes an enquiry a strong immediate opportunity?
           </span>
           <textarea
@@ -330,9 +357,25 @@ export default function Onboarding() {
           />
         </label>
 
-        <label>
-          WARM lead criteria
-          <span className="hint">
+        <label
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            marginTop: 18,
+          }}
+        >
+          <span style={{ fontWeight: 700 }}>
+            WARM lead criteria
+          </span>
+          <span
+            className="hint"
+            style={{
+              display: 'block',
+              marginTop: -2,
+              lineHeight: 1.45,
+            }}
+          >
             What makes an enquiry genuine but not yet ready to buy?
           </span>
           <textarea
@@ -351,9 +394,36 @@ export default function Onboarding() {
           />
         </label>
 
-        <label>
-          Ready to contact
-          <span className="hint">
+        <div
+          style={{
+            marginTop: 28,
+            marginBottom: 8,
+            fontSize: 18,
+            fontWeight: 700,
+          }}
+        >
+          Handover
+        </div>
+
+        <label
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            marginTop: 18,
+          }}
+        >
+          <span style={{ fontWeight: 700 }}>
+            Ready to contact
+          </span>
+          <span
+            className="hint"
+            style={{
+              display: 'block',
+              marginTop: -2,
+              lineHeight: 1.45,
+            }}
+          >
             When should the AI hand the enquiry to a salesperson?
           </span>
           <textarea
@@ -368,19 +438,45 @@ export default function Onboarding() {
               )
             }
             rows="5"
-            placeholder="For example: required information collected and customer has provided a phone number or email..."
+            placeholder="For example: all required information has been collected and the customer has provided a phone number or email..."
           />
         </label>
 
-        <label>
-          Additional qualification rules
-          <span className="hint">
-            Any other instructions the AI should follow.
+        <div
+          style={{
+            marginTop: 28,
+            marginBottom: 8,
+            fontSize: 18,
+            fontWeight: 700,
+          }}
+        >
+          Additional AI instructions
+        </div>
+
+        <label
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            marginTop: 18,
+          }}
+        >
+          <span
+            className="hint"
+            style={{
+              display: 'block',
+              lineHeight: 1.45,
+            }}
+          >
+            General instructions for how the AI should handle enquiries.
+            These should not be used to define mandatory information, as that
+            is controlled by the required information settings above.
           </span>
           <textarea
             value={form.rules}
             onChange={e => set('rules', e.target.value)}
             rows="5"
+            placeholder="For example: prioritise urgent enquiries, be concise, explain services clearly and avoid repeating questions..."
           />
         </label>
 
