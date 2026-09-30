@@ -139,20 +139,6 @@ export default async function LeadDetails({ params }) {
                 <strong>{lead.timescale || 'Not provided'}</strong>
               </div>
 
-              <div>
-                <small>Last contacted</small>
-                <strong>
-                  {lead.last_contacted_at
-                    ? new Date(lead.last_contacted_at).toLocaleString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
-                    : 'Not contacted yet'}
-                </strong>
-              </div>
 
               <div>
                 <small>Status</small>

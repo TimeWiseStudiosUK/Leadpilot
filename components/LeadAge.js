@@ -26,12 +26,27 @@ function getAgeLabel(date) {
   return `${years} ${years === 1 ? 'year' : 'years'} ago`
 }
 
+function formatLocalDate(date) {
+  return date.toLocaleString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 export default function LeadAge({ timestamp }) {
   const date = new Date(timestamp)
-  const [age, setAge] = useState(() => getAgeLabel(date))
+  const [formattedDate, setFormattedDate] = useState('')
+  const [age, setAge] = useState('')
 
   useEffect(() => {
-    const update = () => setAge(getAgeLabel(date))
+    const update = () => {
+      setFormattedDate(formatLocalDate(date))
+      setAge(getAgeLabel(date))
+    }
+
     update()
 
     const interval = setInterval(update, 60000)
@@ -40,17 +55,14 @@ export default function LeadAge({ timestamp }) {
 
   return (
     <span style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <small style={{ color: '#475569', fontSize: 12 }}>
-        {date.toLocaleString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })}
+      <small
+        suppressHydrationWarning
+        style={{ color: '#475569', fontSize: 12 }}
+      >
+        {formattedDate || '—'}
       </small>
       <small style={{ color: '#94a3b8', fontSize: 12 }}>
-        {age}
+        {age || 'Just now'}
       </small>
     </span>
   )

@@ -51,7 +51,8 @@ export default function LeadStatusSelect({ leadId, status, initialStatus }) {
   const style = styles[value] || styles.NEW
 
   return (
-    <select
+    <span onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()}>
+      <select
       value={value}
       onChange={handleChange}
       disabled={saving}
@@ -71,11 +72,12 @@ export default function LeadStatusSelect({ leadId, status, initialStatus }) {
         minWidth: 96,
       }}
     >
-      {statuses.map((item) => (
-        <option key={item} value={item}>
-          {item}
-        </option>
-      ))}
-    </select>
+        {statuses.map((item) => (
+          <option key={item} value={item}>
+            {item}
+          </option>
+        ))}
+      </select>
+    </span>
   )
 }

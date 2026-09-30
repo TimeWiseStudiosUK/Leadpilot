@@ -358,41 +358,50 @@ export default async function Dashboard({ searchParams }) {
               </div>
 
               {activeLeads.map((lead) => (
-                <Link
-                  href={`/dashboard/leads/${lead.id}`}
+                <div
                   className="tr"
                   key={lead.id}
                   style={{
                     gridTemplateColumns: '1.25fr 1.8fr .65fr .75fr 1fr',
                   }}
                 >
-                  <span>
-                    <b>{lead.name || 'Unknown'}</b>
-                    <small>
-                      {lead.email ||
-                        lead.phone ||
-                        lead.postcode ||
-                        'Details being collected'}
-                    </small>
-                  </span>
+                  <Link
+                    href={`/dashboard/leads/${lead.id}`}
+                    style={{ display: 'contents', color: 'inherit', textDecoration: 'none' }}
+                  >
+                    <span>
+                      <b>{lead.name || 'Unknown'}</b>
+                      <small>
+                        {lead.email ||
+                          lead.phone ||
+                          lead.postcode ||
+                          'Details being collected'}
+                      </small>
+                    </span>
 
-                  <span>
-                    {lead.service || lead.enquiry || 'General enquiry'}
-                  </span>
+                    <span>
+                      {lead.service || lead.enquiry || 'General enquiry'}
+                    </span>
 
-                  <span>
-                    <em className={lead.score.toLowerCase()}>
-                      {lead.score}
-                    </em>
-                  </span>
+                    <span>
+                      <em className={lead.score.toLowerCase()}>
+                        {lead.score}
+                      </em>
+                    </span>
+                  </Link>
 
                   <LeadStatusSelect
-                  leadId={lead.id}
-                  status={lead.status}
-                />
+                    leadId={lead.id}
+                    status={lead.status}
+                  />
 
-                  <LeadAge timestamp={lead.created_at} />
-                </Link>
+                  <Link
+                    href={`/dashboard/leads/${lead.id}`}
+                    style={{ display: 'contents', color: 'inherit', textDecoration: 'none' }}
+                  >
+                    <LeadAge timestamp={lead.created_at} />
+                  </Link>
+                </div>
               ))}
             </div>
           ) : (
