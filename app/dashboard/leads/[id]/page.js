@@ -3,6 +3,7 @@ import LeadActions from '../../../../components/LeadActions'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '../../../../lib/supabase/server'
 import LeadNotes from '../../../../components/LeadNotes'
+import LeadActivityTimeline from '../../../../components/LeadActivityTimeline'
 import LeadStatusSelect from '../../../../components/LeadStatusSelect'
 
 export default async function LeadDetails({ params }) {
@@ -226,7 +227,9 @@ export default async function LeadDetails({ params }) {
               )}
             </section>
 
-            <LeadNotes leadId={lead.id} />
+            <LeadActivityTimeline leadId={lead.id} />
+
+            <div className="leadNotesSpacing"><LeadNotes leadId={lead.id} /></div>
 
 <section className="card conversationCard">
           <div className="sectionHeading">

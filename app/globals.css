@@ -337,3 +337,21 @@
     flex: 1;
   }
 }
+
+
+.leadActivityCard { margin-top: 24px; margin-bottom: 24px; }
+.leadActivityCard .sectionHeading { margin-bottom: 24px; }
+.activityEmpty { padding: 24px 20px; border: 1px solid #e3e7ee; border-radius: 12px; background: #fafbfc; color: #68758a; }
+.activityError { padding: 14px 16px; border-radius: 10px; background: #fff4f4; color: #b42318; }
+.activityTimeline { position: relative; display: flex; flex-direction: column; gap: 0; }
+.activityItem { position: relative; display: flex; gap: 16px; padding: 0 0 24px; }
+.activityItem:not(:last-child)::after { content: ''; position: absolute; left: 16px; top: 34px; bottom: 0; width: 1px; background: #e3e7ee; }
+.activityIcon { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex: 0 0 34px; border: 1px solid #dfe4eb; border-radius: 50%; background: #fff; color: #526071; font-size: 13px; font-weight: 700; }
+.activityContent { min-width: 0; flex: 1; padding-top: 2px; }
+.activityTop { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.activityTop strong { font-size: 15px; line-height: 1.4; }
+.activityTop time { color: #7a8699; font-size: 12px; white-space: nowrap; }
+.activityContent p { margin: 6px 0 0; color: #5f6b7a; line-height: 1.5; }
+@media (max-width: 700px) { .activityTop { align-items: flex-start; flex-direction: column; gap: 4px; } }
+
+.leadNotesSpacing { margin-bottom: 24px; }

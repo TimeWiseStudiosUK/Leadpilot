@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '../../../lib/supabase/server'
+import { createAdminClient } from '../../../lib/supabase/admin'
 
 export async function POST(request) {
   try {
@@ -101,6 +102,20 @@ export async function POST(request) {
         { status: 500 }
       )
     }
+
+    const admin = createAdminClient()
+
+    await admin
+      .from('lead_activities')
+      .insert({
+        organization_id: membership.organization_id,
+        lead_id: lead.id,
+        user_id: user.id,
+        activity_type: 'CREATED',
+        title: 'Lead created',
+        description: 'Lead created manually in LeadPilot.',
+        metadata: { source: 'MANUAL' },
+      })
 
     return NextResponse.json(
       { success: true, lead },
