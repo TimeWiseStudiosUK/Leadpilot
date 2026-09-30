@@ -37,20 +37,39 @@ export async function POST(request) {
         existingLead=existing.data
       }
 
+      const name = lead.name ?? existingLead?.name ?? null
+      const email = lead.email ?? existingLead?.email ?? null
+      const phone = lead.phone ?? existingLead?.phone ?? null
+      const postcode = lead.postcode ?? existingLead?.postcode ?? null
+      const service = lead.service ?? existingLead?.service ?? null
+      const propertyType = lead.property_type ?? existingLead?.property_type ?? null
+      const timescale = lead.timescale ?? existingLead?.timescale ?? null
+      const enquiry = lead.enquiry ?? existingLead?.enquiry ?? null
+
+      const qualificationComplete = Boolean(
+        name &&
+        (email || phone) &&
+        postcode &&
+        service &&
+        propertyType &&
+        timescale &&
+        enquiry
+      )
+
       const payload={
         organization_id:assistant.organization_id,
         assistant_id:assistant.id,
-        name:lead.name ?? existingLead?.name ?? null,
-        email:lead.email ?? existingLead?.email ?? null,
-        phone:lead.phone ?? existingLead?.phone ?? null,
-        postcode:lead.postcode ?? existingLead?.postcode ?? null,
-        service:lead.service ?? existingLead?.service ?? null,
-        property_type:lead.property_type ?? existingLead?.property_type ?? null,
-        timescale:lead.timescale ?? existingLead?.timescale ?? null,
-        enquiry:lead.enquiry ?? existingLead?.enquiry ?? null,
+        name,
+        email,
+        phone,
+        postcode,
+        service,
+        property_type:propertyType,
+        timescale,
+        enquiry,
         summary:lead.summary || existingLead?.summary || null,
         score:lead.score ?? existingLead?.score ?? null,
-        ready_to_contact:Boolean(existingLead?.ready_to_contact || lead.ready_to_contact)
+        ready_to_contact:qualificationComplete
       }
 
       if(conversation.lead_id){
