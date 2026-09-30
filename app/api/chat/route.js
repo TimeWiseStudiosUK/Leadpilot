@@ -46,14 +46,23 @@ export async function POST(request) {
       const timescale = lead.timescale ?? existingLead?.timescale ?? null
       const enquiry = lead.enquiry ?? existingLead?.enquiry ?? null
 
-      const qualificationComplete = Boolean(
-        name &&
-        (email || phone) &&
-        postcode &&
-        service &&
-        propertyType &&
-        timescale &&
-        enquiry
+      const qualificationSettings = assistant.qualification_settings || {}
+      const requiredFields = Array.isArray(qualificationSettings.requiredFields)
+        ? qualificationSettings.requiredFields
+        : ['name', 'contact', 'service', 'enquiry']
+
+      const qualificationValues = {
+        name: Boolean(name),
+        contact: Boolean(email || phone),
+        postcode: Boolean(postcode),
+        service: Boolean(service),
+        property_type: Boolean(propertyType),
+        timescale: Boolean(timescale),
+        enquiry: Boolean(enquiry),
+      }
+
+      const qualificationComplete = requiredFields.every(
+        (field) => qualificationValues[field] === true
       )
 
       const payload={

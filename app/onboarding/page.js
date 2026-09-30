@@ -22,6 +22,12 @@ export default function Onboarding() {
     rules: '',
     greeting: '',
     tone: 'friendly, professional and concise',
+    qualificationSettings: {
+      requiredFields: ['name', 'contact', 'service', 'enquiry'],
+      hotCriteria: '',
+      warmCriteria: '',
+      readyCriteria: '',
+    },
   })
 
   useEffect(() => {
@@ -82,6 +88,17 @@ export default function Onboarding() {
         rules: assistant.qualification_rules || '',
         greeting: assistant.greeting || '',
         tone: assistant.tone || 'friendly, professional and concise',
+        qualificationSettings: {
+          requiredFields:
+            assistant.qualification_settings?.requiredFields ||
+            ['name', 'contact', 'service', 'enquiry'],
+          hotCriteria:
+            assistant.qualification_settings?.hotCriteria || '',
+          warmCriteria:
+            assistant.qualification_settings?.warmCriteria || '',
+          readyCriteria:
+            assistant.qualification_settings?.readyCriteria || '',
+        },
       })
 
       setLoading(false)
@@ -236,15 +253,134 @@ export default function Onboarding() {
 
         <h2>Lead qualification</h2>
 
+        <p className="hint">
+          Choose what the AI should collect before handing an enquiry to your team.
+        </p>
+
         <label>
-          Qualification rules
+          Information to collect
+        </label>
+
+        <div style={{
+          display: 'grid',
+          gap: 10,
+          marginBottom: 20,
+        }}>
+          {[
+            ['name', 'Customer name'],
+            ['contact', 'Phone or email'],
+            ['postcode', 'Postcode / location'],
+            ['service', 'Service required'],
+            ['property_type', 'Property / business type'],
+            ['timescale', 'Timescale'],
+            ['enquiry', 'Enquiry details'],
+          ].map(([value, label]) => (
+            <label
+              key={value}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                fontWeight: 400,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={form.qualificationSettings.requiredFields.includes(value)}
+                onChange={e => {
+                  const current = form.qualificationSettings.requiredFields
+
+                  const requiredFields = e.target.checked
+                    ? [...new Set([...current, value])]
+                    : current.filter(field => field !== value)
+
+                  set(
+                    'qualificationSettings',
+                    {
+                      ...form.qualificationSettings,
+                      requiredFields,
+                    }
+                  )
+                }}
+                style={{ width: 18, height: 18 }}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+
+        <label>
+          HOT lead criteria
           <span className="hint">
-            Tell the AI what makes an enquiry valuable.
+            What makes an enquiry a strong immediate opportunity?
+          </span>
+          <textarea
+            value={form.qualificationSettings.hotCriteria}
+            onChange={e =>
+              set(
+                'qualificationSettings',
+                {
+                  ...form.qualificationSettings,
+                  hotCriteria: e.target.value,
+                }
+              )
+            }
+            rows="5"
+            placeholder="For example: urgent work, ready to proceed, clear scope of work, high-value project..."
+          />
+        </label>
+
+        <label>
+          WARM lead criteria
+          <span className="hint">
+            What makes an enquiry genuine but not yet ready to buy?
+          </span>
+          <textarea
+            value={form.qualificationSettings.warmCriteria}
+            onChange={e =>
+              set(
+                'qualificationSettings',
+                {
+                  ...form.qualificationSettings,
+                  warmCriteria: e.target.value,
+                }
+              )
+            }
+            rows="5"
+            placeholder="For example: researching options, longer-term project, needs more information..."
+          />
+        </label>
+
+        <label>
+          Ready to contact
+          <span className="hint">
+            When should the AI hand the enquiry to a salesperson?
+          </span>
+          <textarea
+            value={form.qualificationSettings.readyCriteria}
+            onChange={e =>
+              set(
+                'qualificationSettings',
+                {
+                  ...form.qualificationSettings,
+                  readyCriteria: e.target.value,
+                }
+              )
+            }
+            rows="5"
+            placeholder="For example: required information collected and customer has provided a phone number or email..."
+          />
+        </label>
+
+        <label>
+          Additional qualification rules
+          <span className="hint">
+            Any other instructions the AI should follow.
           </span>
           <textarea
             value={form.rules}
             onChange={e => set('rules', e.target.value)}
-            rows="7"
+            rows="5"
           />
         </label>
 

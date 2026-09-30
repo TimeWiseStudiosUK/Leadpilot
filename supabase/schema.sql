@@ -27,6 +27,7 @@ create table if not exists public.assistants (
   services jsonb not null default '[]'::jsonb,
   areas jsonb not null default '[]'::jsonb,
   qualification_rules text not null default '',
+  qualification_settings jsonb not null default '{}'::jsonb,
   tone text not null default 'friendly, professional and concise',
   active boolean not null default true,
   created_at timestamptz not null default now()

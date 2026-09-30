@@ -124,6 +124,14 @@ export async function PATCH(request) {
         qualification_rules:
           form.rules?.trim() || '',
 
+        qualification_settings:
+          form.qualificationSettings || {
+            requiredFields: ['name', 'contact', 'service', 'enquiry'],
+            hotCriteria: '',
+            warmCriteria: '',
+            readyCriteria: '',
+          },
+
         tone:
           form.tone?.trim() ||
           'friendly, professional and concise',
