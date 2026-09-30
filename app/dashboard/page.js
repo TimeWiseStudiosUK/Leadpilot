@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '../../lib/supabase/server'
 import LeadAge from '../../components/LeadAge'
+import LeadStatusSelect from '../../components/LeadStatusSelect'
 
 export default async function Dashboard({ searchParams }) {
   const supabase = await createClient()
@@ -56,6 +57,12 @@ export default async function Dashboard({ searchParams }) {
       .maybeSingle(),
   ])
 
+  const { data: allActiveLeads } = await supabase
+    .from('leads')
+    .select('status')
+    .eq('organization_id', membership.organization_id)
+    .is('archived_at', null)
+
   let leadsQuery = supabase
     .from('leads')
     .select('*')
@@ -93,6 +100,12 @@ export default async function Dashboard({ searchParams }) {
   const activeLeads = leads || []
   const hot = activeLeads.filter((lead) => lead.score === 'HOT').length
   const warm = activeLeads.filter((lead) => lead.score === 'WARM').length
+
+  const allLeads = allActiveLeads || []
+  const wonLeads = allLeads.filter((lead) => lead.status === 'WON').length
+  const conversionRate = allLeads.length
+    ? Math.round((wonLeads / allLeads.length) * 100)
+    : 0
 
   return (
     <main className="app">
@@ -144,6 +157,11 @@ export default async function Dashboard({ searchParams }) {
           <div>
             <span>Warm leads</span>
             <b>{warm}</b>
+          </div>
+
+          <div>
+            <span>Conversion rate</span>
+            <b>{conversionRate}%</b>
           </div>
 
           <div>
@@ -368,7 +386,10 @@ export default async function Dashboard({ searchParams }) {
                     </em>
                   </span>
 
-                  <span>{lead.status}</span>
+                  <LeadStatusSelect
+                  leadId={lead.id}
+                  status={lead.status}
+                />
 
                   <LeadAge timestamp={lead.created_at} />
                 </Link>

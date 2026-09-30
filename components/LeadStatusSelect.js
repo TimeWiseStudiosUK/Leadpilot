@@ -1,62 +1,81 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const statuses = ['NEW', 'CONTACTED', 'WON', 'LOST']
 
-export default function LeadStatusSelect({ leadId, initialStatus }) {
-  const [status, setStatus] = useState(initialStatus || 'NEW')
+const styles = {
+  NEW: { background: '#f1f5f9', color: '#475569', border: '#cbd5e1' },
+  CONTACTED: { background: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },
+  WON: { background: '#ecfdf5', color: '#047857', border: '#a7f3d0' },
+  LOST: { background: '#fef2f2', color: '#dc2626', border: '#fecaca' },
+}
+
+export default function LeadStatusSelect({ leadId, status, initialStatus }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const startingStatus = status || initialStatus || 'NEW'
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
+  const [value, setValue] = useState(startingStatus)
 
   async function handleChange(event) {
     const nextStatus = event.target.value
-    const previousStatus = status
-
-    setStatus(nextStatus)
+    setValue(nextStatus)
     setSaving(true)
-    setError('')
 
     try {
-      const response = await fetch('/api/leads/status', {
+      const response = await fetch(`/api/leads/${leadId}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          leadId,
-          status: nextStatus,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'status', status: nextStatus }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error('Unable to save status')
+        throw new Error(data.error || 'Unable to update status')
       }
-    } catch (err) {
-      setStatus(previousStatus)
-      setError('Could not save status. Please try again.')
+
+      router.replace(`/dashboard?${searchParams.toString()}`)
+      router.refresh()
+    } catch (error) {
+      console.error(error)
+      setValue(startingStatus)
+      alert(error.message)
     } finally {
       setSaving(false)
     }
   }
 
-  return (
-    <div>
-      <select
-        value={status}
-        onChange={handleChange}
-        disabled={saving}
-        className="statusSelect"
-      >
-        {statuses.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+  const style = styles[value] || styles.NEW
 
-      {saving && <small className="savingStatus">Saving...</small>}
-      {error && <small className="statusError">{error}</small>}
-    </div>
+  return (
+    <select
+      value={value}
+      onChange={handleChange}
+      disabled={saving}
+      aria-label="Lead status"
+      style={{
+        appearance: 'none',
+        WebkitAppearance: 'none',
+        padding: '5px 24px 5px 9px',
+        border: `1px solid ${style.border}`,
+        borderRadius: 999,
+        backgroundColor: style.background,
+        color: style.color,
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: saving ? 'wait' : 'pointer',
+        opacity: saving ? 0.65 : 1,
+        minWidth: 96,
+      }}
+    >
+      {statuses.map((item) => (
+        <option key={item} value={item}>
+          {item}
+        </option>
+      ))}
+    </select>
   )
 }

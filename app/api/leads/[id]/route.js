@@ -28,10 +28,14 @@ export async function PATCH(request, { params }) {
     }
 
     const { id } = await params
-    const { action } = await request.json()
+    const body = await request.json()
+    const { action, status } = body
 
-    if (!['archive', 'restore'].includes(action)) {
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+    if (!['archive', 'restore', 'status'].includes(action)) {
+      return NextResponse.json(
+        { error: 'Invalid action' },
+        { status: 400 }
+      )
     }
 
     const { membership, error: membershipError } =
@@ -59,6 +63,42 @@ export async function PATCH(request, { params }) {
     }
 
     const admin = createAdminClient()
+
+    if (action === 'status') {
+      if (!['NEW', 'CONTACTED', 'WON', 'LOST'].includes(status)) {
+        return NextResponse.json(
+          { error: 'Invalid lead status' },
+          { status: 400 }
+        )
+      }
+
+      const updateData = {
+        status,
+      }
+
+      if (status === 'CONTACTED') {
+        updateData.last_contacted_at = new Date().toISOString()
+      }
+
+      const { error } = await admin
+        .from('leads')
+        .update(updateData)
+        .eq('id', id)
+        .eq('organization_id', membership.organization_id)
+
+      if (error) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 400 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        action: 'status',
+        status,
+      })
+    }
 
     const { error } = await admin
       .from('leads')
