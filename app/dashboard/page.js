@@ -384,9 +384,29 @@ export default async function Dashboard({ searchParams }) {
                     </span>
 
                     <span>
-                      <em className={lead.score.toLowerCase()}>
-                        {lead.score}
-                      </em>
+                      {lead.score ? (
+                        <em className={lead.score.toLowerCase()}>
+                          {lead.score}
+                        </em>
+                      ) : (
+                        <em className="unscored">
+                          Unscored
+                        </em>
+                      )}
+
+                      {lead.ready_to_contact && (
+                        <small
+                          style={{
+                            display: 'block',
+                            marginTop: 5,
+                            color: '#15803d',
+                            fontWeight: 700,
+                            fontSize: 11,
+                          }}
+                        >
+                          Ready to contact
+                        </small>
+                      )}
                     </span>
                   </Link>
 

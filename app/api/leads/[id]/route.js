@@ -76,9 +76,9 @@ export async function PATCH(request, { params }) {
         status,
       }
 
-      if (status === 'CONTACTED') {
-        updateData.last_contacted_at = new Date().toISOString()
-      }
+      if (status !== 'NEW') {
+      updateData.ready_to_contact = false
+    }
 
       const { error } = await admin
         .from('leads')
