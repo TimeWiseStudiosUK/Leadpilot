@@ -26,10 +26,10 @@ export async function POST(request) {
       )
     }
 
-    const allowedScores = ['HOT', 'WARM', 'COLD']
+    const allowedScores = ['HOT', 'WARM']
     const allowedStatuses = ['NEW', 'CONTACTED', 'WON', 'LOST']
 
-    const safeScore = allowedScores.includes(score) ? score : 'COLD'
+    const safeScore = allowedScores.includes(score) ? score : null
     const safeStatus = allowedStatuses.includes(status) ? status : 'NEW'
 
     const supabase = await createClient()

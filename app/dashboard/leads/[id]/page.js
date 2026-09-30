@@ -54,7 +54,7 @@ export default async function LeadDetails({ params }) {
     messages = data || []
   }
 
-  const scoreClass = lead.score?.toLowerCase() || 'cold'
+  const scoreClass = lead.score?.toLowerCase() || 'unscored'
 
   return (
     <main className="app">
@@ -84,7 +84,7 @@ export default async function LeadDetails({ params }) {
           </div>
 
           <div className={`leadScore ${scoreClass}`}>
-            {lead.score || 'COLD'}
+            {lead.score || 'Unscored'}
           </div>
         </div>
 

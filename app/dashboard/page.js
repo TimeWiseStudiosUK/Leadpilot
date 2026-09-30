@@ -29,7 +29,7 @@ export default async function Dashboard({ searchParams }) {
     ? params.search.trim()
     : ''
 
-  const score = ['HOT', 'WARM', 'COLD'].includes(params?.score)
+  const score = ['HOT', 'WARM'].includes(params?.score)
     ? params.score
     : ''
 
@@ -265,7 +265,7 @@ export default async function Dashboard({ searchParams }) {
               <option value="">All scores</option>
               <option value="HOT">Hot</option>
               <option value="WARM">Warm</option>
-              <option value="COLD">Cold</option>
+
             </select>
 
             <select

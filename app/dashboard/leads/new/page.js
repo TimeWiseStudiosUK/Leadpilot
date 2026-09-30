@@ -18,7 +18,7 @@ export default function NewLeadPage() {
     timescale: '',
     enquiry: '',
     notes: '',
-    score: 'COLD',
+    score: '',
     status: 'NEW',
   })
 
@@ -181,7 +181,7 @@ export default function NewLeadPage() {
                 >
                   <option value="HOT">Hot</option>
                   <option value="WARM">Warm</option>
-                  <option value="COLD">Cold</option>
+
                 </select>
               </div>
 
