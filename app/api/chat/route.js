@@ -23,10 +23,57 @@ export async function POST(request) {
     const result=await runLeadPilot({assistant,history:previous||[],message:message.trim()})
     const ins=await admin.from('messages').insert([{conversation_id:conversation.id,role:'user',content:message.trim()},{conversation_id:conversation.id,role:'assistant',content:result.reply}]); if(ins.error)throw ins.error
     const lead=result.lead
-    if(lead.name||lead.email||lead.phone||lead.postcode||lead.service||lead.enquiry){
-      const payload={organization_id:assistant.organization_id,assistant_id:assistant.id,name:lead.name,email:lead.email,phone:lead.phone,postcode:lead.postcode,service:lead.service,property_type:lead.property_type,timescale:lead.timescale,enquiry:lead.enquiry,summary:lead.summary,score:lead.score}
-      if(conversation.lead_id){const r=await admin.from('leads').update(payload).eq('id',conversation.lead_id);if(r.error)throw r.error}
-      else{const r=await admin.from('leads').insert(payload).select('id').single();if(r.error)throw r.error;await admin.from('conversations').update({lead_id:r.data.id}).eq('id',conversation.id)}
+    if(lead.name||lead.email||lead.phone||lead.postcode||lead.service||lead.property_type||lead.timescale||lead.enquiry){
+      let existingLead=null
+
+      if(conversation.lead_id){
+        const existing=await admin
+          .from('leads')
+          .select('*')
+          .eq('id',conversation.lead_id)
+          .single()
+
+        if(existing.error)throw existing.error
+        existingLead=existing.data
+      }
+
+      const payload={
+        organization_id:assistant.organization_id,
+        assistant_id:assistant.id,
+        name:lead.name ?? existingLead?.name ?? null,
+        email:lead.email ?? existingLead?.email ?? null,
+        phone:lead.phone ?? existingLead?.phone ?? null,
+        postcode:lead.postcode ?? existingLead?.postcode ?? null,
+        service:lead.service ?? existingLead?.service ?? null,
+        property_type:lead.property_type ?? existingLead?.property_type ?? null,
+        timescale:lead.timescale ?? existingLead?.timescale ?? null,
+        enquiry:lead.enquiry ?? existingLead?.enquiry ?? null,
+        summary:lead.summary || existingLead?.summary || null,
+        score:lead.score ?? existingLead?.score ?? null,
+        ready_to_contact:Boolean(existingLead?.ready_to_contact || lead.ready_to_contact)
+      }
+
+      if(conversation.lead_id){
+        const r=await admin
+          .from('leads')
+          .update(payload)
+          .eq('id',conversation.lead_id)
+
+        if(r.error)throw r.error
+      } else {
+        const r=await admin
+          .from('leads')
+          .insert(payload)
+          .select('id')
+          .single()
+
+        if(r.error)throw r.error
+
+        await admin
+          .from('conversations')
+          .update({lead_id:r.data.id})
+          .eq('id',conversation.id)
+      }
     }
     return NextResponse.json({reply:result.reply,lead:result.lead})
   } catch(e){console.error(e);return NextResponse.json({error:e.message||'AI request failed'},{status:500})}
