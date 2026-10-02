@@ -352,6 +352,183 @@
 .activityTop strong { font-size: 15px; line-height: 1.4; }
 .activityTop time { color: #7a8699; font-size: 12px; white-space: nowrap; }
 .activityContent p { margin: 6px 0 0; color: #5f6b7a; line-height: 1.5; }
+
+.aiFollowUpCard {
+  margin-top: 24px;
+}
+
+.aiFollowUpCard .sectionHeading {
+  margin-bottom: 24px;
+}
+
+.followUpAssessButton {
+  border: 1px solid #d7dce5;
+  border-radius: 9px;
+  padding: 10px 16px;
+  background: #fff;
+  color: #263445;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.followUpAssessButton:hover {
+  background: #f5f7fa;
+}
+
+.followUpAssessButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.followUpGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.followUpStatus {
+  padding: 18px 20px;
+  border: 1px solid #e3e7ee;
+  border-radius: 12px;
+  background: #fafbfc;
+}
+
+.followUpStatus small,
+.followUpReason small,
+.followUpMessage small,
+.followUpRecommendation small {
+  display: block;
+  margin-bottom: 8px;
+  color: #68758a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.followUpStatus strong {
+  display: block;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.followUpReason,
+.followUpMessage {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border-top: 1px solid #e5e8ee;
+}
+
+.followUpReason p,
+.followUpMessage p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.followUpMessage {
+  border-top: 0;
+  border-radius: 12px;
+  background: #f5f7fa;
+}
+
+.followUpActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.followUpSecondaryButton,
+.followUpCompleteButton,
+.followUpCancelButton {
+  padding: 10px 16px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.followUpSecondaryButton {
+  border: 1px solid #d7dce5;
+  background: #fff;
+  color: #526071;
+}
+
+.followUpCompleteButton {
+  border: 1px solid #16803c;
+  background: #16803c;
+  color: #fff;
+}
+
+.followUpCancelButton {
+  border: 1px solid #d7dce5;
+  background: #fff;
+  color: #b42318;
+}
+
+.followUpSecondaryButton:disabled,
+.followUpCompleteButton:disabled,
+.followUpCancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.followUpRecommendation {
+  padding-top: 4px;
+}
+
+.followUpRecommendationHeader {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.followUpRecommendationHeader > div {
+  padding: 18px 20px;
+  border: 1px solid #e3e7ee;
+  border-radius: 12px;
+  background: #fafbfc;
+}
+
+.followUpRecommendationHeader strong {
+  display: block;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.followUpEmpty {
+  padding: 24px 20px;
+  border: 1px solid #e3e7ee;
+  border-radius: 12px;
+  background: #fafbfc;
+  color: #68758a;
+}
+
+.followUpError {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fff4f4;
+  color: #b42318;
+}
+
+@media (max-width: 700px) {
+  .followUpGrid,
+  .followUpRecommendationHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .followUpActions {
+    justify-content: stretch;
+    flex-direction: column;
+  }
+
+  .followUpSecondaryButton,
+  .followUpCompleteButton,
+  .followUpCancelButton {
+    width: 100%;
+  }
+}
+
 @media (max-width: 700px) { .activityTop { align-items: flex-start; flex-direction: column; gap: 4px; } }
 
 .leadNotesSpacing { margin-bottom: 24px; }
