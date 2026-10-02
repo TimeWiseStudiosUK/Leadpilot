@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LeadActions({ leadId, archived = false }) {
   const router = useRouter()
@@ -85,6 +86,22 @@ export default function LeadActions({ leadId, archived = false }) {
         gap: 8,
       }}
     >
+      <Link
+        href={`/dashboard/leads/${leadId}/edit`}
+        style={{
+          padding: '7px 11px',
+          borderRadius: 7,
+          border: '1px solid #dbe1e8',
+          background: '#fff',
+          color: '#2563eb',
+          fontSize: 13,
+          fontWeight: 600,
+          textDecoration: 'none',
+        }}
+      >
+        Edit Lead
+      </Link>
+
       <button
         type="button"
         onClick={archiveOrRestore}
