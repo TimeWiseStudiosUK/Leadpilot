@@ -59,9 +59,21 @@ export default async function Dashboard({ searchParams }) {
 
   const { data: allActiveLeads } = await supabase
     .from('leads')
-    .select('status')
+    .select('status, id, name, score, ready_to_contact, created_at')
     .eq('organization_id', membership.organization_id)
     .is('archived_at', null)
+
+  const now = new Date()
+  const staleCutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+
+  const { data: dueFollowUps } = await supabase
+    .from('lead_follow_ups')
+    .select('id, lead_id, due_at, action, status')
+    .eq('organization_id', membership.organization_id)
+    .in('status', ['PENDING', 'SNOOZED'])
+    .lte('due_at', now.toISOString())
+    .order('due_at', { ascending: true })
+    .limit(10)
 
   let leadsQuery = supabase
     .from('leads')
@@ -102,6 +114,30 @@ export default async function Dashboard({ searchParams }) {
   const warm = activeLeads.filter((lead) => lead.score === 'WARM').length
 
   const allLeads = allActiveLeads || []
+
+  const hotReadyLeads = allLeads.filter(
+    (lead) =>
+      lead.status === 'NEW' &&
+      lead.score === 'HOT' &&
+      lead.ready_to_contact
+  )
+
+  const newLeads = allLeads.filter(
+    (lead) =>
+      lead.status === 'NEW' &&
+      !lead.ready_to_contact &&
+      new Date(lead.created_at) >= staleCutoff
+  )
+
+  const agedLeads = allLeads.filter(
+    (lead) =>
+      lead.status === 'NEW' &&
+      !lead.ready_to_contact &&
+      new Date(lead.created_at) < staleCutoff
+  )
+
+  const activeFollowUps = dueFollowUps || []
+
   const wonLeads = allLeads.filter((lead) => lead.status === 'WON').length
   const conversionRate = allLeads.length
     ? Math.round((wonLeads / allLeads.length) * 100)
@@ -167,6 +203,130 @@ export default async function Dashboard({ searchParams }) {
           <div>
             <span>Assistant</span>
             <b>{assistant?.active ? 'Live' : 'Off'}</b>
+          </div>
+        </section>
+
+        <section className="attentionPanel">
+          <div className="attentionHeader">
+            <div>
+              <small>SALES PRIORITIES</small>
+              <h2>Needs attention</h2>
+              <p>The leads and follow-ups most likely to need action next.</p>
+            </div>
+          </div>
+
+          <div className="attentionGrid">
+            <div className="attentionCard">
+              <div className="attentionCardTop">
+                <span>🔥</span>
+                <strong>HOT leads</strong>
+                <b>{hotReadyLeads.length}</b>
+              </div>
+
+              {hotReadyLeads.length ? (
+                <div className="attentionList">
+                  {hotReadyLeads.slice(0, 3).map((lead) => (
+                    <Link
+                      key={lead.id}
+                      href={`/dashboard/leads/${lead.id}`}
+                      className="attentionLead"
+                    >
+                      <span>
+                        <b>{lead.name || 'Unknown'}</b>
+                        <small>Ready to contact</small>
+                      </span>
+                      <span>→</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="attentionEmpty">No HOT leads need contact.</p>
+              )}
+            </div>
+
+            <div className="attentionCard">
+              <div className="attentionCardTop">
+                <span>📅</span>
+                <strong>Follow-ups</strong>
+                <b>{activeFollowUps.length}</b>
+              </div>
+
+              {activeFollowUps.length ? (
+                <div className="attentionList">
+                  {activeFollowUps.slice(0, 3).map((followUp) => (
+                    <Link
+                      key={followUp.id}
+                      href={`/dashboard/leads/${followUp.lead_id}`}
+                      className="attentionLead"
+                    >
+                      <span>
+                        <b>{followUp.action.replace('_', ' ')}</b>
+                        <small>Due / overdue</small>
+                      </span>
+                      <span>→</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="attentionEmpty">No follow-ups are due.</p>
+              )}
+            </div>
+
+            <div className="attentionCard">
+              <div className="attentionCardTop">
+                <span>🆕</span>
+                <strong>New enquiries</strong>
+                <b>{newLeads.length}</b>
+              </div>
+
+              {newLeads.length ? (
+                <div className="attentionList">
+                  {newLeads.slice(0, 3).map((lead) => (
+                    <Link
+                      key={lead.id}
+                      href={`/dashboard/leads/${lead.id}`}
+                      className="attentionLead"
+                    >
+                      <span>
+                        <b>{lead.name || 'Unknown'}</b>
+                        <small>Still being qualified</small>
+                      </span>
+                      <span>→</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="attentionEmpty">No new enquiries waiting.</p>
+              )}
+            </div>
+
+            <div className="attentionCard">
+              <div className="attentionCardTop">
+                <span>⏳</span>
+                <strong>Aged enquiries</strong>
+                <b>{agedLeads.length}</b>
+              </div>
+
+              {agedLeads.length ? (
+                <div className="attentionList">
+                  {agedLeads.slice(0, 3).map((lead) => (
+                    <Link
+                      key={lead.id}
+                      href={`/dashboard/leads/${lead.id}`}
+                      className="attentionLead"
+                    >
+                      <span>
+                        <b>{lead.name || 'Unknown'}</b>
+                        <small>Waiting for qualification</small>
+                      </span>
+                      <span>→</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="attentionEmpty">No aged enquiries.</p>
+              )}
+            </div>
           </div>
         </section>
 
