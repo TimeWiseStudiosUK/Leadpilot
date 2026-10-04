@@ -143,6 +143,24 @@ export default async function Dashboard({ searchParams }) {
     ? Math.round((wonLeads / allLeads.length) * 100)
     : 0
 
+  const totalAttention =
+    hotReadyLeads.length +
+    activeFollowUps.length +
+    newLeads.length +
+    agedLeads.length
+
+  const priorityLead = hotReadyLeads[0] || (activeFollowUps[0] ? { id: activeFollowUps[0].lead_id, name: "Follow-up due" } : null) || agedLeads[0] || newLeads[0]
+
+  const priorityMessage = hotReadyLeads.length
+    ? `${hotReadyLeads[0]?.name || 'Your HOT lead'} is ready to contact. This should be your first action.`
+    : activeFollowUps.length
+      ? 'You have follow-ups due. Work through these before moving on to lower-priority enquiries.'
+      : agedLeads.length
+        ? 'You have aged enquiries waiting for qualification. Review these and move the strongest opportunities forward.'
+        : newLeads.length
+          ? 'You have new enquiries waiting for qualification. Review them and collect the remaining information.'
+          : 'You are all caught up. There are no outstanding sales priorities right now.'
+
   return (
     <main className="app">
       <header className="bar">
@@ -203,6 +221,33 @@ export default async function Dashboard({ searchParams }) {
           <div>
             <span>Assistant</span>
             <b>{assistant?.active ? 'Live' : 'Off'}</b>
+          </div>
+        </section>
+
+        <section className="dailyBrief">
+          <div className="dailyBriefMain">
+            <small>AI DAILY BRIEF</small>
+            <h2>
+              {totalAttention
+                ? `You have ${totalAttention} priorit${totalAttention === 1 ? 'y' : 'ies'} today.`
+                : 'You are all caught up.'}
+            </h2>
+            <p>{priorityMessage}</p>
+          </div>
+
+          <div className="dailyBriefPriority">
+            <span>PRIORITY</span>
+            {priorityLead ? (
+              <Link href={`/dashboard/leads/${priorityLead.id}`}>
+                <strong>{priorityLead.name || 'Lead'}</strong>
+                <small>Open lead →</small>
+              </Link>
+            ) : (
+              <div>
+                <strong>Nothing outstanding</strong>
+                <small>Keep up the good work</small>
+              </div>
+            )}
           </div>
         </section>
 
