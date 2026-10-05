@@ -11,11 +11,13 @@ export async function POST(request) {
       name,
       email,
       phone,
-      postcode,
+      location,
       service,
-      propertyType,
       timescale,
+      budget,
+      quantity,
       enquiry,
+      customFields,
       notes,
       score,
       status,
@@ -84,11 +86,16 @@ export async function POST(request) {
         name: name.trim(),
         email: email?.trim() || null,
         phone: phone?.trim() || null,
-        postcode: postcode?.trim() || null,
+        location: location?.trim() || null,
         service: service?.trim() || null,
-        property_type: propertyType?.trim() || null,
         timescale: timescale?.trim() || null,
+        budget: budget?.trim() || null,
+        quantity: quantity?.trim() || null,
         enquiry: enquiry?.trim() || null,
+        custom_fields:
+          customFields && typeof customFields === 'object' && !Array.isArray(customFields)
+            ? customFields
+            : {},
         notes: notes?.trim() || null,
         score: safeScore,
         status: safeStatus,
@@ -136,11 +143,12 @@ export async function POST(request) {
       const qualificationValues = {
         name: Boolean(lead.name),
         contact: Boolean(lead.email || lead.phone),
-        postcode: Boolean(lead.postcode),
         service: Boolean(lead.service),
-        property_type: Boolean(lead.property_type),
-        timescale: Boolean(lead.timescale),
         enquiry: Boolean(lead.enquiry),
+        location: Boolean(lead.location),
+        timescale: Boolean(lead.timescale),
+        budget: Boolean(lead.budget),
+        quantity: Boolean(lead.quantity),
       }
 
       const qualificationComplete = requiredFields.every(

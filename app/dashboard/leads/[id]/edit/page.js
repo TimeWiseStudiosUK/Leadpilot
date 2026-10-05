@@ -14,9 +14,7 @@ export default function EditLeadPage() {
     name: '',
     email: '',
     phone: '',
-    postcode: '',
     service: '',
-    propertyType: '',
     timescale: '',
     enquiry: '',
   })
@@ -42,9 +40,7 @@ export default function EditLeadPage() {
           name: lead.name || '',
           email: lead.email || '',
           phone: lead.phone || '',
-          postcode: lead.postcode || '',
           service: lead.service || '',
-          propertyType: lead.property_type || '',
           timescale: lead.timescale || '',
           enquiry: lead.enquiry || '',
         })
@@ -174,14 +170,6 @@ export default function EditLeadPage() {
                 />
               </div>
 
-              <div className={styles.field}>
-                <label htmlFor="postcode">Postcode</label>
-                <input
-                  id="postcode"
-                  value={form.postcode}
-                  onChange={e => updateField('postcode', e.target.value)}
-                />
-              </div>
             </div>
           </section>
 
@@ -203,14 +191,6 @@ export default function EditLeadPage() {
                 />
               </div>
 
-              <div className={styles.field}>
-                <label htmlFor="propertyType">Property type</label>
-                <input
-                  id="propertyType"
-                  value={form.propertyType}
-                  onChange={e => updateField('propertyType', e.target.value)}
-                />
-              </div>
 
               <div className={styles.field}>
                 <label htmlFor="timescale">Timescale</label>

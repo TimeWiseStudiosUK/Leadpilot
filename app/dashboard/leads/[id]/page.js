@@ -116,8 +116,8 @@ export default async function LeadDetails({ params }) {
               </div>
 
               <div>
-                <small>Postcode</small>
-                <strong>{lead.postcode || 'Not provided'}</strong>
+                <small>Location</small>
+                <strong>{lead.location || 'Not provided'}</strong>
               </div>
             </div>
           </section>
@@ -132,8 +132,8 @@ export default async function LeadDetails({ params }) {
               </div>
 
               <div>
-                <small>Property type</small>
-                <strong>{lead.property_type || 'Not provided'}</strong>
+                <small>Budget</small>
+                <strong>{lead.budget || 'Not provided'}</strong>
               </div>
 
               <div>

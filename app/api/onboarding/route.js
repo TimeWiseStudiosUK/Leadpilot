@@ -16,10 +16,18 @@ export async function POST(request) {
   if (memberError) return NextResponse.json({ error: memberError.message }, { status: 400 })
   const { data: assistant, error: assistantError } = await admin.from('assistants').insert({
     organization_id: org.id, public_slug: slug, name: 'AI Sales Assistant', greeting: form.greeting,
-    business_description: `${form.name} is a ${form.industry || 'business'}.`,
+    business_description: form.businessDescription?.trim() || `${form.name} is a ${form.industry || 'business'}.`,
     services: (form.services || '').split('\n').map(x=>x.trim()).filter(Boolean),
     areas: (form.areas || '').split('\n').map(x=>x.trim()).filter(Boolean),
-    qualification_rules: form.rules || ''
+    qualification_rules: form.rules || '',
+    qualification_settings: form.qualificationSettings || {
+      requiredFields: ['name', 'contact', 'service', 'enquiry'],
+      hotCriteria: '',
+      warmCriteria: '',
+      readyCriteria: '',
+      additionalInformation: '',
+    },
+    tone: form.tone || 'friendly, professional and concise'
   }).select().single()
   if (assistantError) return NextResponse.json({ error: assistantError.message }, { status: 400 })
   return NextResponse.json({ organization: org, assistant })

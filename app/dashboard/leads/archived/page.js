@@ -87,7 +87,7 @@ export default async function ArchivedLeads() {
                     <small>
                       {lead.email ||
                         lead.phone ||
-                        lead.postcode ||
+                        lead.location ||
                         'No contact details'}
                     </small>
                   </span>

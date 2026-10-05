@@ -772,3 +772,68 @@
     border-left: 0;
   }
 }
+
+/* AI Employee Training Hub */
+.employeeTrainingPage { min-height: 100vh; padding: 34px 18px 60px; background: #f4f7fb; color: #172033; }
+.employeeTrainingShell { width: min(900px, 100%); margin: 0 auto; }
+.employeeTrainingHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:26px; }
+.employeeBrand { display:flex; align-items:center; gap:12px; font-size:19px; }
+.employeeLogo { display:grid; place-items:center; width:42px; height:42px; border-radius:12px; background:#15213a; color:#fff; font-weight:800; }
+.employeeTrainingMode { color:#315de8; font-size:10px; font-weight:800; letter-spacing:.12em; }
+.employeeProgress { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
+.employeeProgress span { height:6px; border-radius:10px; background:#dfe5ee; }
+.employeeProgress span.active { background:#315de8; }
+.employeeProgressMeta { display:flex; justify-content:space-between; margin:9px 0 20px; color:#8190a5; font-size:11px; font-weight:600; }
+.employeeTrainingCard { padding:48px 52px 28px; border:1px solid #dfe5ee; border-radius:18px; background:#fff; box-shadow:0 14px 40px rgba(20,35,60,.06); }
+.employeeEyebrow { margin:0 0 8px; color:#315de8; font-size:11px; font-weight:800; letter-spacing:.13em; }
+.employeeStepTitle { margin:0; color:#172033; font-size:30px; line-height:1.18; }
+.employeeStepIntro { max-width:700px; margin:10px 0 0; color:#6d7b91; font-size:15px; line-height:1.6; }
+.employeeStepContent { margin-top:34px; }
+.employeeField { display:block; margin-bottom:24px; }
+.employeeFieldLabel { display:block; margin-bottom:7px; color:#25334a; font-size:14px; font-weight:700; }
+.employeeFieldHint { display:block; margin:-2px 0 8px; color:#8794a8; font-size:12px; line-height:1.45; }
+.employeeField input,.employeeField textarea { width:100%; border:1px solid #d7dfeb; border-radius:10px; padding:13px 14px; background:#fff; color:#172033; font:inherit; font-size:14px; outline:none; resize:vertical; }
+.employeeField input:focus,.employeeField textarea:focus { border-color:#315de8; box-shadow:0 0 0 3px rgba(49,93,232,.08); }
+.employeeField input::placeholder,.employeeField textarea::placeholder { color:#a2adbd; }
+.employeeReassurance,.employeeTip { margin:18px 0 0; padding:14px 16px; border-radius:10px; background:#f5f8ff; color:#66758b; font-size:12px; line-height:1.6; }
+.employeeReassurance strong,.employeeTip strong { color:#33445e; }
+.employeePriorityExamples { margin:8px 0 22px; }
+.employeePriorityExamples > span { display:block; margin-bottom:8px; color:#8794a8; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.employeePriorityExamples div { display:flex; flex-wrap:wrap; gap:8px; }
+.employeePriorityExamples b { padding:8px 10px; border:1px solid #e1e6ee; border-radius:999px; background:#fafbfc; color:#526071; font-size:11px; }
+.employeeFieldGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:22px; }
+.employeeFieldOption,.employeeToneOption { display:flex; align-items:flex-start; gap:12px; width:100%; padding:14px; border:1px solid #dfe5ee; border-radius:11px; background:#fff; color:#25334a; text-align:left; cursor:pointer; }
+.employeeFieldOption:hover,.employeeToneOption:hover { border-color:#bfcbe0; background:#fafcff; }
+.employeeFieldOption.selected,.employeeToneOption.selected { border-color:#315de8; background:#f5f8ff; box-shadow:0 0 0 1px #315de8 inset; }
+.employeeCheckbox { display:grid; place-items:center; width:22px; height:22px; flex:0 0 22px; border:1px solid #cbd5e1; border-radius:6px; color:#fff; font-size:13px; font-weight:800; }
+.employeeFieldOption.selected .employeeCheckbox { border-color:#315de8; background:#315de8; }
+.employeeFieldOption strong,.employeeToneOption strong { display:block; font-size:13px; }
+.employeeFieldOption small,.employeeToneOption small { display:block; margin-top:4px; color:#7d899b; font-size:11px; line-height:1.4; }
+.employeeToneGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:28px; }
+.employeeToneOption { flex-direction:column; min-height:92px; }
+.employeeReady { text-align:center; }
+.employeeReadyIcon { display:grid; place-items:center; width:56px; height:56px; margin:0 auto 18px; border-radius:50%; background:#eaf7ef; color:#16803c; font-size:25px; font-weight:800; }
+.employeeReady h1 { margin:0; color:#172033; font-size:30px; }
+.employeeReadyIntro { max-width:650px; margin:10px auto 28px; color:#6d7b91; font-size:14px; line-height:1.6; }
+.employeeSummaryGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; }
+.employeeSummaryItem { padding:16px; border:1px solid #e1e6ee; border-radius:11px; background:#fafbfc; }
+.employeeSummaryItem span { display:block; margin-bottom:6px; color:#8794a8; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+.employeeSummaryItem strong { display:block; color:#25334a; font-size:13px; line-height:1.5; }
+.employeeReadyNote { margin:22px auto 0; max-width:680px; color:#7b8799; font-size:12px; line-height:1.5; }
+.employeeError { margin-top:20px; padding:12px 14px; border-radius:9px; background:#fff4f4; color:#b42318; font-size:13px; }
+.employeeNavigation { display:flex; justify-content:space-between; gap:12px; margin-top:34px; padding-top:22px; border-top:1px solid #edf0f4; }
+.employeeBack,.employeeContinue { min-height:44px; padding:11px 18px; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer; }
+.employeeBack { border:1px solid #d7dee8; background:#fff; color:#526071; }
+.employeeContinue { border:1px solid #315de8; background:#315de8; color:#fff; margin-left:auto; }
+.employeeBack:disabled { opacity:.35; cursor:not-allowed; }
+.employeeContinue:disabled { opacity:.65; cursor:not-allowed; }
+.employeeContinue span { margin-left:6px; }
+@media (max-width:700px) {
+  .employeeTrainingPage { padding:18px 12px 40px; }
+  .employeeTrainingHeader { margin-bottom:20px; }
+  .employeeTrainingMode { display:none; }
+  .employeeTrainingCard { padding:30px 20px 22px; border-radius:14px; }
+  .employeeStepTitle,.employeeReady h1 { font-size:25px; }
+  .employeeFieldGrid,.employeeToneGrid,.employeeSummaryGrid { grid-template-columns:1fr; }
+  .employeeProgress { gap:4px; }
+}

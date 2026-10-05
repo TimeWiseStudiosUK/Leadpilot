@@ -6,11 +6,13 @@ const meaningfulFields = [
   'name',
   'email',
   'phone',
-  'postcode',
+  'location',
   'service',
-  'property_type',
   'timescale',
+  'budget',
+  'quantity',
   'enquiry',
+  'custom_fields',
 ]
 
 function normalise(value) {
@@ -135,11 +137,18 @@ export async function PATCH(request, { params }) {
       name,
       email: normalise(body.email) || null,
       phone: normalise(body.phone) || null,
-      postcode: normalise(body.postcode) || null,
+      location: normalise(body.location) || null,
       service: normalise(body.service) || null,
-      property_type: normalise(body.propertyType) || null,
       timescale: normalise(body.timescale) || null,
+      budget: normalise(body.budget) || null,
+      quantity: normalise(body.quantity) || null,
       enquiry: normalise(body.enquiry) || null,
+      custom_fields:
+        body.customFields &&
+        typeof body.customFields === 'object' &&
+        !Array.isArray(body.customFields)
+          ? body.customFields
+          : {},
     }
 
     const changedFields = meaningfulFields.filter(
@@ -201,11 +210,12 @@ export async function PATCH(request, { params }) {
       const qualificationValues = {
         name: Boolean(updatedLead.name),
         contact: Boolean(updatedLead.email || updatedLead.phone),
-        postcode: Boolean(updatedLead.postcode),
         service: Boolean(updatedLead.service),
-        property_type: Boolean(updatedLead.property_type),
-        timescale: Boolean(updatedLead.timescale),
         enquiry: Boolean(updatedLead.enquiry),
+        location: Boolean(updatedLead.location),
+        timescale: Boolean(updatedLead.timescale),
+        budget: Boolean(updatedLead.budget),
+        quantity: Boolean(updatedLead.quantity),
       }
 
       const qualificationComplete = requiredFields.every(
@@ -252,11 +262,13 @@ export async function PATCH(request, { params }) {
           name: 'Name',
           email: 'Email',
           phone: 'Phone',
-          postcode: 'Postcode',
-          service: 'Service',
-          property_type: 'Property type',
+          location: 'Location',
+          service: 'Service or product',
           timescale: 'Timescale',
-          enquiry: 'Enquiry',
+          budget: 'Budget',
+          quantity: 'Quantity',
+          enquiry: 'Enquiry details',
+          custom_fields: 'Additional information',
         }[field] || field)).join(', ')}. Score: ${assessedLead.score || 'Unscored'}. Ready to contact: ${assessedLead.ready_to_contact ? 'Yes' : 'No'}.`,
         metadata: {
           trigger: 'LEAD_EDIT',

@@ -23,7 +23,7 @@ export async function POST(request) {
     const result=await runLeadPilot({assistant,history:previous||[],message:message.trim()})
     const ins=await admin.from('messages').insert([{conversation_id:conversation.id,role:'user',content:message.trim()},{conversation_id:conversation.id,role:'assistant',content:result.reply}]); if(ins.error)throw ins.error
     const lead=result.lead
-    if(lead.name||lead.email||lead.phone||lead.postcode||lead.service||lead.property_type||lead.timescale||lead.enquiry){
+    if(lead.name||lead.email||lead.phone||lead.service||lead.timescale||lead.enquiry||lead.location||lead.budget||lead.quantity||lead.custom_fields?.length){
       let existingLead=null
 
       if(conversation.lead_id){
@@ -40,11 +40,33 @@ export async function POST(request) {
       const name = lead.name ?? existingLead?.name ?? null
       const email = lead.email ?? existingLead?.email ?? null
       const phone = lead.phone ?? existingLead?.phone ?? null
-      const postcode = lead.postcode ?? existingLead?.postcode ?? null
+      const location = lead.location ?? existingLead?.location ?? null
       const service = lead.service ?? existingLead?.service ?? null
-      const propertyType = lead.property_type ?? existingLead?.property_type ?? null
       const timescale = lead.timescale ?? existingLead?.timescale ?? null
+      const budget = lead.budget ?? existingLead?.budget ?? null
+      const quantity = lead.quantity ?? existingLead?.quantity ?? null
       const enquiry = lead.enquiry ?? existingLead?.enquiry ?? null
+
+      const existingCustomFields =
+        existingLead?.custom_fields &&
+        typeof existingLead.custom_fields === 'object' &&
+        !Array.isArray(existingLead.custom_fields)
+          ? existingLead.custom_fields
+          : {}
+
+      const incomingCustomFields = Array.isArray(lead.custom_fields)
+        ? lead.custom_fields.reduce((acc, field) => {
+            if(field?.key && field?.value){
+              acc[field.key]=field.value
+            }
+            return acc
+          }, {})
+        : {}
+
+      const customFields = {
+        ...existingCustomFields,
+        ...incomingCustomFields,
+      }
 
       const qualificationSettings = assistant.qualification_settings || {}
       const requiredFields = Array.isArray(qualificationSettings.requiredFields)
@@ -54,16 +76,19 @@ export async function POST(request) {
       const qualificationValues = {
         name: Boolean(name),
         contact: Boolean(email || phone),
-        postcode: Boolean(postcode),
         service: Boolean(service),
-        property_type: Boolean(propertyType),
-        timescale: Boolean(timescale),
         enquiry: Boolean(enquiry),
+        location: Boolean(location),
+        timescale: Boolean(timescale),
+        budget: Boolean(budget),
+        quantity: Boolean(quantity),
       }
 
-      const qualificationComplete = requiredFields.every(
-        (field) => qualificationValues[field] === true
-      )
+      const qualificationComplete =
+        Boolean(lead.qualification_complete) &&
+        requiredFields.every(
+          (field) => qualificationValues[field] === true
+        )
 
       const payload={
         organization_id:assistant.organization_id,
@@ -71,14 +96,16 @@ export async function POST(request) {
         name,
         email,
         phone,
-        postcode,
+        location,
         service,
-        property_type:propertyType,
         timescale,
+        budget,
+        quantity,
         enquiry,
+        custom_fields:customFields,
         summary:lead.summary || existingLead?.summary || null,
         score:lead.score ?? existingLead?.score ?? null,
-        ready_to_contact:qualificationComplete
+        ready_to_contact:qualificationComplete && Boolean(email || phone)
       }
 
       if(conversation.lead_id){

@@ -90,7 +90,7 @@ export default async function Dashboard({ searchParams }) {
 
     if (safeSearch) {
       leadsQuery = leadsQuery.or(
-        `name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,phone.ilike.%${safeSearch}%,postcode.ilike.%${safeSearch}%,service.ilike.%${safeSearch}%,enquiry.ilike.%${safeSearch}%,property_type.ilike.%${safeSearch}%`
+        `name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,phone.ilike.%${safeSearch}%,location.ilike.%${safeSearch}%,service.ilike.%${safeSearch}%,enquiry.ilike.%${safeSearch}%`
       )
     }
   }
@@ -182,7 +182,7 @@ export default async function Dashboard({ searchParams }) {
             Test assistant
           </Link>
 
-          <Link href="/onboarding">Settings</Link>
+          <Link href="/onboarding">AI Employee</Link>
         </nav>
       </header>
 
@@ -579,7 +579,7 @@ export default async function Dashboard({ searchParams }) {
                       <small>
                         {lead.email ||
                           lead.phone ||
-                          lead.postcode ||
+                          lead.location ||
                           'Details being collected'}
                       </small>
                     </span>

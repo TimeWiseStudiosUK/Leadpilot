@@ -12,10 +12,11 @@ export default function NewLeadPage() {
     name: '',
     email: '',
     phone: '',
-    postcode: '',
     service: '',
-    propertyType: '',
+    location: '',
     timescale: '',
+    budget: '',
+    quantity: '',
     enquiry: '',
     notes: '',
     score: '',
@@ -126,11 +127,11 @@ export default function NewLeadPage() {
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="postcode">Postcode</label>
+                <label htmlFor="location">Location</label>
                 <input
-                  id="postcode"
-                  value={form.postcode}
-                  onChange={e => updateField('postcode', e.target.value)}
+                  id="location"
+                  value={form.location}
+                  onChange={e => updateField('location', e.target.value)}
                 />
               </div>
             </div>
@@ -146,20 +147,11 @@ export default function NewLeadPage() {
 
             <div className={styles.grid}>
               <div className={styles.field}>
-                <label htmlFor="service">Service</label>
+                <label htmlFor="service">Service or product</label>
                 <input
                   id="service"
                   value={form.service}
                   onChange={e => updateField('service', e.target.value)}
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="propertyType">Property type</label>
-                <input
-                  id="propertyType"
-                  value={form.propertyType}
-                  onChange={e => updateField('propertyType', e.target.value)}
                 />
               </div>
 
@@ -173,35 +165,27 @@ export default function NewLeadPage() {
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="score">Lead score</label>
-                <select
-                  id="score"
-                  value={form.score}
-                  onChange={e => updateField('score', e.target.value)}
-                >
-                  <option value="HOT">Hot</option>
-                  <option value="WARM">Warm</option>
-
-                </select>
+                <label htmlFor="budget">Budget</label>
+                <input
+                  id="budget"
+                  value={form.budget}
+                  onChange={e => updateField('budget', e.target.value)}
+                />
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="status">Status</label>
-                <select
-                  id="status"
-                  value={form.status}
-                  onChange={e => updateField('status', e.target.value)}
-                >
-                  <option value="NEW">New</option>
-                  <option value="CONTACTED">Contacted</option>
-                  <option value="WON">Won</option>
-                  <option value="LOST">Lost</option>
-                </select>
+                <label htmlFor="quantity">Quantity</label>
+                <input
+                  id="quantity"
+                  value={form.quantity}
+                  onChange={e => updateField('quantity', e.target.value)}
+                />
               </div>
+
             </div>
 
             <div className={styles.fullField}>
-              <label htmlFor="enquiry">Enquiry</label>
+              <label htmlFor="enquiry">Enquiry details</label>
               <textarea
                 id="enquiry"
                 rows="5"
@@ -220,6 +204,8 @@ export default function NewLeadPage() {
               />
             </div>
           </section>
+
+
 
           {error && (
             <div className={styles.error}>
