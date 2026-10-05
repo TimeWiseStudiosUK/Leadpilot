@@ -68,6 +68,8 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [training, setTraining] = useState(false)
+  const [trainingSuggestions, setTrainingSuggestions] = useState(null)
   const [step, setStep] = useState(0)
   const [existingBusiness, setExistingBusiness] = useState(false)
   const [form, setForm] = useState(defaultForm)
@@ -153,6 +155,51 @@ export default function Onboarding() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  async function trainQualification() {
+    const hotCriteria = form.qualificationSettings.hotCriteria.trim()
+    const warmCriteria = form.qualificationSettings.warmCriteria.trim()
+
+    if (!hotCriteria && !warmCriteria) {
+      setError('Give me a little guidance first, then I can help train your AI employee.')
+      return
+    }
+
+    setTraining(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/onboarding/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hotCriteria,
+          warmCriteria,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Could not generate AI training suggestions.')
+        return
+      }
+
+      setTrainingSuggestions(data.suggestions)
+    } catch {
+      setError('Could not generate AI training suggestions.')
+    } finally {
+      setTraining(false)
+    }
+  }
+
+  function applyTrainingSuggestions() {
+    if (!trainingSuggestions) return
+
+    updateQualification('hotCriteria', trainingSuggestions.hotCriteria)
+    updateQualification('warmCriteria', trainingSuggestions.warmCriteria)
+    setTrainingSuggestions(null)
+  }
+
   async function finish() {
     setSaving(true)
     setError('')
@@ -191,7 +238,14 @@ export default function Onboarding() {
       <div className="employeeTrainingShell">
         <header className="employeeTrainingHeader">
           <div className="employeeBrand"><span className="employeeLogo">LP</span><strong>LeadPilot</strong></div>
-          <span className="employeeTrainingMode">{existingBusiness ? 'AI EMPLOYEE' : 'TRAIN YOUR AI EMPLOYEE'}</span>
+          <div className="employeeTrainingHeaderRight">
+            <span className="employeeTrainingMode">{existingBusiness ? 'AI EMPLOYEE' : 'TRAIN YOUR AI EMPLOYEE'}</span>
+            {existingBusiness && (
+              <button type="button" className="employeeDashboardLink" onClick={() => router.push('/dashboard')}>
+                ← Dashboard
+              </button>
+            )}
+          </div>
         </header>
 
         <div className="employeeProgress" aria-label={`Step ${step + 1} of ${steps.length}`}>
@@ -225,7 +279,43 @@ export default function Onboarding() {
           {step === 2 && (
             <StepFrame eyebrow="LEAD QUALITY" title="What makes a great lead?" intro="You're the expert on your business. Tell me what makes an enquiry worth your team's attention.">
               <Field label="What makes an enquiry a strong opportunity?" hint="Think about customers who are likely to buy, have a clear need or are valuable to your business." value={form.qualificationSettings.hotCriteria} onChange={value => updateQualification('hotCriteria', value)} placeholder="For example: urgent work, ready to proceed, clear scope, high-value project..." multiline rows={7} />
+
               <Field label="What makes an enquiry genuine, but not ready yet?" hint="These become useful WARM opportunities that should not be ignored." value={form.qualificationSettings.warmCriteria} onChange={value => updateQualification('warmCriteria', value)} placeholder="For example: researching options, planning work later, needs more information..." multiline rows={6} />
+
+              <button type="button" className="employeeAiButton" onClick={trainQualification} disabled={training}>
+                {training ? 'Training your AI employee...' : '✨ Help me turn this into AI rules'}
+              </button>
+
+              {trainingSuggestions && (
+                <div className="employeeTrainingResult">
+                  <div className="employeeTrainingResultHeader">
+                    <span>AI TRAINING SUGGESTION</span>
+                    <strong>Here's what I've learned</strong>
+                  </div>
+
+                  <div className="employeeTrainingRule">
+                    <span>🔥 HOT</span>
+                    <p>{trainingSuggestions.hotCriteria}</p>
+                  </div>
+
+                  <div className="employeeTrainingRule">
+                    <span>🟠 WARM</span>
+                    <p>{trainingSuggestions.warmCriteria}</p>
+                  </div>
+
+                  <p className="employeeTip"><strong>Does this look right?</strong> These suggestions won't be saved until you approve them.</p>
+
+                  <div className="employeeTrainingActions">
+                    <button type="button" className="employeePrimaryAction" onClick={applyTrainingSuggestions}>
+                      ✓ Use these rules
+                    </button>
+                    <button type="button" className="employeeSecondaryAction" onClick={() => setTrainingSuggestions(null)}>
+                      Keep my wording
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <p className="employeeTip"><strong>Keep it natural.</strong> Write this exactly as you'd explain it to a new salesperson joining your team.</p>
             </StepFrame>
           )}

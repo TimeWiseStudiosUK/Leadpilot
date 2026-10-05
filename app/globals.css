@@ -837,3 +837,163 @@
   .employeeFieldGrid,.employeeToneGrid,.employeeSummaryGrid { grid-template-columns:1fr; }
   .employeeProgress { gap:4px; }
 }
+
+
+.employeeAiButton {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px 18px;
+  border: 1px solid #cfd9ea;
+  border-radius: 10px;
+  background: #f7f9fd;
+  color: #1f4f9a;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.employeeAiButton:hover:not(:disabled) {
+  background: #eef4ff;
+  border-color: #a9bddf;
+}
+
+.employeeAiButton:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.employeeTrainingResult {
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid #cfdbea;
+  border-radius: 12px;
+  background: #f8faff;
+}
+
+.employeeTrainingResultHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.employeeTrainingResultHeader span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #3568b8;
+}
+
+.employeeTrainingResultHeader strong {
+  font-size: 18px;
+  color: #172033;
+}
+
+.employeeTrainingRule {
+  padding: 14px 16px;
+  margin-top: 10px;
+  border: 1px solid #e0e6ef;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.employeeTrainingRule span {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.employeeTrainingRule p {
+  margin: 0;
+  color: #39465a;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.employeeTrainingActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.employeePrimaryAction,
+.employeeSecondaryAction {
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.employeePrimaryAction {
+  border: 1px solid #1f5fbf;
+  background: #1f5fbf;
+  color: #ffffff;
+}
+
+.employeePrimaryAction:hover {
+  background: #194f9f;
+}
+
+.employeeSecondaryAction {
+  border: 1px solid #d2d9e4;
+  background: #ffffff;
+  color: #39465a;
+}
+
+.employeeSecondaryAction:hover {
+  background: #f4f6f9;
+}
+
+@media (max-width: 600px) {
+  .employeeTrainingActions {
+    flex-direction: column;
+  }
+
+  .employeePrimaryAction,
+  .employeeSecondaryAction {
+    width: 100%;
+  }
+}
+
+
+.employeeTrainingHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.employeeDashboardLink {
+  padding: 8px 12px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #44536a;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.employeeDashboardLink:hover {
+  background: #f4f6f9;
+  border-color: #c4cedc;
+  color: #1f4f9a;
+}
+
+@media (max-width: 600px) {
+  .employeeTrainingHeaderRight {
+    gap: 8px;
+  }
+
+  .employeeTrainingMode {
+    display: none;
+  }
+
+  .employeeDashboardLink {
+    padding: 7px 10px;
+  }
+}
