@@ -4,6 +4,8 @@ import { createClient } from '../../lib/supabase/server'
 import LeadAge from '../../components/LeadAge'
 import LeadStatusSelect from '../../components/LeadStatusSelect'
 
+import SalesManagerPanel from '../../components/SalesManagerPanel'
+
 export default async function Dashboard({ searchParams }) {
   const supabase = await createClient()
 
@@ -224,7 +226,9 @@ export default async function Dashboard({ searchParams }) {
           </div>
         </section>
 
-        <section className="dailyBrief">
+        <SalesManagerPanel />
+
+      <section className="dailyBrief">
           <div className="dailyBriefMain">
             <small>AI DAILY BRIEF</small>
             <h2>
