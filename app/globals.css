@@ -997,3 +997,199 @@
     padding: 7px 10px;
   }
 }
+
+.salesManagerPanel {
+  margin-bottom: 22px;
+  padding: 24px;
+  border: 1px solid #dfe5ee;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f8faff 0%, #ffffff 70%);
+}
+
+.salesManagerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.salesManagerHeader small,
+.salesManagerResultMain > span,
+.salesManagerSecondary span {
+  display: block;
+  margin-bottom: 7px;
+  color: #1648b5;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+}
+
+.salesManagerHeader h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.salesManagerHeader p {
+  margin: 0;
+  color: #64748b;
+}
+
+.salesManagerButton {
+  flex-shrink: 0;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: #1648b5;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.salesManagerButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.salesManagerError {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #fff1f2;
+  color: #b42318;
+}
+
+.salesManagerResult {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.7fr);
+  gap: 24px;
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid #e5eaf1;
+}
+
+.salesManagerResultMain h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.salesManagerResultMain p {
+  margin: 0 0 14px;
+  color: #475569;
+  line-height: 1.55;
+}
+
+.salesManagerResultMain strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+.salesManagerMessage {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #f5f7fb;
+}
+
+.salesManagerSecondary {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-left: 24px;
+  border-left: 1px solid #e5eaf1;
+}
+
+.salesManagerSecondary div {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5eaf1;
+}
+
+.salesManagerSecondary div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.salesManagerSecondary p {
+  margin: 7px 0 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.salesManagerSecondary p strong {
+  display: inline;
+  color: #172033;
+}
+
+@media (max-width: 700px) {
+  .salesManagerHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .salesManagerButton {
+    width: 100%;
+  }
+
+  .salesManagerResult {
+    grid-template-columns: 1fr;
+  }
+
+  .salesManagerSecondary {
+    padding-left: 0;
+    padding-top: 18px;
+    border-left: 0;
+    border-top: 1px solid #e5eaf1;
+  }
+}
+
+.salesManagerOpportunity {
+  margin-top: 12px;
+}
+
+.salesManagerOpportunity strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #172033;
+  font-size: 14px;
+}
+
+.salesManagerOpportunity p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.salesManagerItem {
+  margin-top: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5eaf1;
+}
+
+.salesManagerItem:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.salesManagerItem strong {
+  display: block;
+  color: #172033;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.salesManagerItem p {
+  margin: 5px 0 7px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.salesManagerItem a {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.salesManagerItem a:hover {
+  text-decoration: underline;
+}
