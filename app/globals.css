@@ -1034,6 +1034,13 @@
   color: #64748b;
 }
 
+.salesManagerLastAnalysed {
+  display:block;
+  margin-top:10px;
+  color:#7a8799;
+  font-size:12px;
+}
+
 .salesManagerButton {
   flex-shrink: 0;
   padding: 12px 18px;

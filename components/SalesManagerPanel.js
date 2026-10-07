@@ -1,12 +1,29 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function SalesManagerPanel() {
   const [loading, setLoading] = useState(false)
   const [insight, setInsight] = useState(null)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function loadSavedInsight() {
+      try {
+        const response = await fetch('/api/sales-manager')
+        const data = await response.json()
+
+        if (response.ok && data.success) {
+          setInsight(data.insight || null)
+        }
+      } catch {
+        // Saved insight is optional; the user can refresh the analysis manually.
+      }
+    }
+
+    loadSavedInsight()
+  }, [])
 
   async function runSalesManager() {
     setLoading(true)
@@ -38,6 +55,11 @@ export default function SalesManagerPanel() {
             Run an AI analysis to identify the most important opportunity
             and what you should do next.
           </p>
+          {insight?.generated_at ? (
+            <small className="salesManagerLastAnalysed">
+              Last analysed {new Date(insight.generated_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
+            </small>
+          ) : null}
         </div>
 
         <button
@@ -46,7 +68,7 @@ export default function SalesManagerPanel() {
           disabled={loading}
           className="salesManagerButton"
         >
-          {loading ? 'Analysing pipeline...' : 'Run AI Sales Manager'}
+          {loading ? 'Analysing pipeline...' : insight ? 'Refresh AI Analysis' : 'Run AI Sales Manager'}
         </button>
       </div>
 

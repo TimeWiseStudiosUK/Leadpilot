@@ -2,6 +2,65 @@ import { createClient } from '../../../lib/supabase/server'
 import { createAdminClient } from '../../../lib/supabase/admin'
 import { analyseSalesPipeline } from '../../../lib/sales-manager'
 
+async function getSalesManagerMembership(admin, userId) {
+  const { data: membership, error: membershipError } = await admin
+    .from('organization_members')
+    .select('organization_id, role')
+    .eq('user_id', userId)
+    .in('role', ['owner', 'admin'])
+    .limit(1)
+    .maybeSingle()
+
+  if (membershipError) {
+    throw new Error('Unable to load your organization.')
+  }
+
+  if (membership == null) {
+    throw new Error('You do not have permission to view the Sales Manager.')
+  }
+
+  return membership
+}
+
+export async function GET() {
+  try {
+    const supabase = await createClient()
+    const admin = createAdminClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user == null) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const membership = await getSalesManagerMembership(admin, user.id)
+
+    const { data: insight, error } = await admin
+      .from('sales_manager_insights')
+      .select('*')
+      .eq('organization_id', membership.organization_id)
+      .eq('status', 'ACTIVE')
+      .order('generated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Sales Manager insight load error:', error)
+      return Response.json(
+        { error: 'Unable to load the saved Sales Manager analysis.' },
+        { status: 500 }
+      )
+    }
+
+    return Response.json({
+      success: true,
+      insight: insight == null ? null : insight,
+    })
+  } catch (error) {
+    console.error('Sales Manager load error:', error)
+    return Response.json({ error: error?.message || 'Unable to load the Sales Manager' }, { status: 500 })
+  }
+}
 export async function POST() {
   try {
     const supabase = await createClient()
@@ -66,7 +125,7 @@ export async function POST() {
       admin
         .from('leads')
         .select(
-          'id, name, email, phone, location, service, timescale, budget, quantity, enquiry, custom_fields, score, status, ready_to_contact, preferred_contact_method, marketing_email, marketing_sms, marketing_phone, marketing_whatsapp, do_not_contact, communication_preference_source,  created_at, created_at'
+          'id, name, email, phone, location, service, timescale, budget, quantity, enquiry, custom_fields, score, status, ready_to_contact, preferred_contact_method, marketing_email, marketing_sms, marketing_phone, marketing_whatsapp, do_not_contact, communication_preference_source, created_at'
         )
         .eq('organization_id', organizationId)
         .neq('status', 'LOST')
@@ -164,7 +223,7 @@ export async function POST() {
       .from('sales_manager_insights')
       .update({
         status: 'SUPERSEDED',
-        created_at: now,
+        updated_at: now,
       })
       .eq('organization_id', organizationId)
       .eq('status', 'ACTIVE')
