@@ -19,6 +19,7 @@ const defaultForm = {
     warmCriteria: '',
     readyCriteria: '',
     additionalInformation: '',
+    customFields: [],
   },
 }
 
@@ -58,6 +59,7 @@ function normaliseAssistant(organisation, assistant) {
       warmCriteria: assistant?.qualification_settings?.warmCriteria || '',
       readyCriteria: assistant?.qualification_settings?.readyCriteria || '',
       additionalInformation: assistant?.qualification_settings?.additionalInformation || '',
+      customFields: Array.isArray(assistant?.qualification_settings?.customFields) ? assistant.qualification_settings.customFields : [],
     },
   }
 }
@@ -172,6 +174,12 @@ export default function Onboarding() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          businessName: form.name.trim(),
+          industry: form.industry.trim(),
+          businessDescription: form.businessDescription.trim(),
+          services: form.services.trim(),
+          areas: form.areas.trim(),
+          additionalInformation: form.qualificationSettings.additionalInformation.trim(),
           hotCriteria,
           warmCriteria,
         }),
@@ -180,13 +188,13 @@ export default function Onboarding() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Could not generate AI training suggestions.')
+        setError((data.error || data.message || ('Training API returned HTTP ' + response.status)) + (data.details ? ' ' + data.details : ''))
         return
       }
 
       setTrainingSuggestions(data.suggestions)
     } catch {
-      setError('Could not generate AI training suggestions.')
+      setError('Could not generate AI training suggestions. Please try again.')
     } finally {
       setTraining(false)
     }
@@ -197,6 +205,7 @@ export default function Onboarding() {
 
     updateQualification('hotCriteria', trainingSuggestions.hotCriteria)
     updateQualification('warmCriteria', trainingSuggestions.warmCriteria)
+    updateQualification('customFields', trainingSuggestions.customFields || [])
     setTrainingSuggestions(null)
   }
 
@@ -302,6 +311,15 @@ export default function Onboarding() {
                     <span>🟠 WARM</span>
                     <p>{trainingSuggestions.warmCriteria}</p>
                   </div>
+
+                  {trainingSuggestions.customFields?.length ? (
+                    <div className="employeeTrainingRule">
+                      <span>📋 BUSINESS-SPECIFIC INFORMATION</span>
+                      {trainingSuggestions.customFields.map(field => (
+                        <p key={field.key}>✓ <strong>{field.label}</strong> {field.required ? '(required)' : '(optional)'}</p>
+                      ))}
+                    </div>
+                  ) : null}
 
                   <p className="employeeTip"><strong>Does this look right?</strong> These suggestions won't be saved until you approve them.</p>
 

@@ -83,11 +83,12 @@ export async function POST(request) {
     const qualification = assistant.qualification_settings || {}
 
     const suggestions = await suggestQualificationTraining({
-      businessName: organization.name,
-      industry: organization.industry,
-      businessDescription: assistant.business_description,
-      services: assistant.services || [],
-      areas: assistant.areas || [],
+      businessName: body.businessName?.trim() || '',
+      industry: body.industry?.trim() || '',
+      businessDescription: body.businessDescription?.trim() || '',
+      services: body.services?.trim() || '',
+      areas: body.areas?.trim() || '',
+      additionalInformation: body.additionalInformation?.trim() || '',
       hotCriteria: body.hotCriteria?.trim() || '',
       warmCriteria: body.warmCriteria?.trim() || '',
     })
