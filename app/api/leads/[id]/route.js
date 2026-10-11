@@ -1,6 +1,7 @@
 import { createClient } from '../../../../lib/supabase/server'
 import { createAdminClient } from '../../../../lib/supabase/admin'
 import { assessLead } from '../../../../lib/ai'
+import { evaluateQualification } from '../../../../lib/qualification'
 
 const meaningfulFields = [
   'name',
@@ -59,7 +60,27 @@ export async function GET(request, { params }) {
     return Response.json({ error: 'Lead not found' }, { status: 404 })
   }
 
-  return Response.json({ lead })
+  let qualificationSettings = {}
+
+  if (lead.assistant_id) {
+    const { data: assistant, error: assistantError } = await supabase
+      .from('assistants')
+      .select('qualification_settings')
+      .eq('id', lead.assistant_id)
+      .eq('organization_id', membership.organization_id)
+      .maybeSingle()
+
+    if (assistantError) {
+      console.error('Load qualification settings error:', assistantError)
+    }
+
+    qualificationSettings = assistant?.qualification_settings || {}
+  }
+
+  return Response.json({
+    lead,
+    qualificationSettings,
+  })
 }
 
 export async function PATCH(request, { params }) {
@@ -148,12 +169,17 @@ export async function PATCH(request, { params }) {
         typeof body.customFields === 'object' &&
         !Array.isArray(body.customFields)
           ? body.customFields
-          : {},
+          : existingLead.custom_fields || {},
     }
 
-    const changedFields = meaningfulFields.filter(
-      field => normalise(existingLead[field]) !== normalise(updatedFields[field])
-    )
+    const changedFields = meaningfulFields.filter(field => {
+      if (field === 'custom_fields') {
+        return JSON.stringify(existingLead.custom_fields || {}) !==
+          JSON.stringify(updatedFields.custom_fields || {})
+      }
+
+      return normalise(existingLead[field]) !== normalise(updatedFields[field])
+    })
 
     const { data: updatedLead, error: updateError } = await admin
       .from('leads')
@@ -201,31 +227,14 @@ export async function PATCH(request, { params }) {
       const qualificationSettings =
         assistant.qualification_settings || {}
 
-      const requiredFields = Array.isArray(
-        qualificationSettings.requiredFields
-      )
-        ? qualificationSettings.requiredFields
-        : ['name', 'contact', 'service', 'enquiry']
+      const qualificationResult = evaluateQualification({
+      qualificationSettings,
+      lead: updatedLead,
+    })
 
-      const qualificationValues = {
-        name: Boolean(updatedLead.name),
-        contact: Boolean(updatedLead.email || updatedLead.phone),
-        service: Boolean(updatedLead.service),
-        enquiry: Boolean(updatedLead.enquiry),
-        location: Boolean(updatedLead.location),
-        timescale: Boolean(updatedLead.timescale),
-        budget: Boolean(updatedLead.budget),
-        quantity: Boolean(updatedLead.quantity),
-      }
-
-      const qualificationComplete = requiredFields.every(
-        field => qualificationValues[field] === true
-      )
-
-      const readyToContact =
-        updatedLead.status === 'NEW' &&
-        qualificationComplete &&
-        Boolean(updatedLead.email || updatedLead.phone)
+    const readyToContact =
+      updatedLead.status === 'NEW' &&
+      qualificationResult.readyToContact
 
       const { data: assessedLead, error: assessmentUpdateError } =
         await admin

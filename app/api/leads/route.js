@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '../../../lib/supabase/server'
 import { createAdminClient } from '../../../lib/supabase/admin'
 import { assessLead } from '../../../lib/ai'
+import { evaluateQualification } from '../../../lib/qualification'
 
 export async function POST(request) {
   try {
@@ -135,30 +136,20 @@ export async function POST(request) {
         lead,
       })
 
-      const qualification = assistant.qualification_settings || {}
-      const requiredFields = Array.isArray(qualification.requiredFields)
-        ? qualification.requiredFields
-        : ['name', 'contact', 'service', 'enquiry']
+      const qualificationSettings =
+        assistant.qualification_settings || {}
 
-      const qualificationValues = {
-        name: Boolean(lead.name),
-        contact: Boolean(lead.email || lead.phone),
-        service: Boolean(lead.service),
-        enquiry: Boolean(lead.enquiry),
-        location: Boolean(lead.location),
-        timescale: Boolean(lead.timescale),
-        budget: Boolean(lead.budget),
-        quantity: Boolean(lead.quantity),
-      }
+      const qualificationResult = evaluateQualification({
+        qualificationSettings,
+        lead,
+      })
 
-      const qualificationComplete = requiredFields.every(
-        field => qualificationValues[field] === true
-      )
+      const qualificationComplete =
+        qualificationResult.qualificationComplete
 
       const readyToContact =
         safeStatus === 'NEW' &&
-        qualificationComplete &&
-        Boolean(lead.email || lead.phone)
+        qualificationResult.readyToContact
 
       const updateData = {
         score: assessment.lead.score || null,

@@ -1200,3 +1200,54 @@
 .salesManagerItem a:hover {
   text-decoration: underline;
 }
+
+.employeeCustomField,
+.employeeCustomFieldDraft {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+  margin: 12px 0;
+  border: 1px solid #dce4f1;
+  border-radius: 12px;
+  background: #fbfcff;
+}
+
+.employeeCustomField label,
+.employeeCustomFieldDraft label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  color: #34445e;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.employeeCustomField input,
+.employeeCustomField select,
+.employeeCustomFieldDraft input,
+.employeeCustomFieldDraft select,
+.employeeFieldOption select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #d5deeb;
+  border-radius: 8px;
+  background: #fff;
+  color: #263650;
+  font: inherit;
+}
+
+.employeeCustomField > button,
+.employeeCustomFieldDraft > button {
+  justify-self: start;
+  align-self: end;
+}
+
+@media (max-width: 650px) {
+  .employeeCustomField,
+  .employeeCustomFieldDraft {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

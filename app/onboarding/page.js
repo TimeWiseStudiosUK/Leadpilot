@@ -15,6 +15,7 @@ const defaultForm = {
   tone: 'friendly, professional and concise',
   qualificationSettings: {
     requiredFields: ['name', 'contact', 'service', 'enquiry'],
+    enabledFields: ['name', 'contact', 'service', 'enquiry'],
     hotCriteria: '',
     warmCriteria: '',
     readyCriteria: '',
@@ -55,6 +56,7 @@ function normaliseAssistant(organisation, assistant) {
     tone: assistant?.tone || defaultForm.tone,
     qualificationSettings: {
       requiredFields: assistant?.qualification_settings?.requiredFields || defaultForm.qualificationSettings.requiredFields,
+      enabledFields: assistant?.qualification_settings?.enabledFields || assistant?.qualification_settings?.requiredFields || defaultForm.qualificationSettings.enabledFields,
       hotCriteria: assistant?.qualification_settings?.hotCriteria || '',
       warmCriteria: assistant?.qualification_settings?.warmCriteria || '',
       readyCriteria: assistant?.qualification_settings?.readyCriteria || '',
@@ -75,6 +77,7 @@ export default function Onboarding() {
   const [step, setStep] = useState(0)
   const [existingBusiness, setExistingBusiness] = useState(false)
   const [form, setForm] = useState(defaultForm)
+  const [customFieldDraft, setCustomFieldDraft] = useState({ label: '', required: false })
 
   useEffect(() => {
     async function load() {
@@ -133,12 +136,61 @@ export default function Onboarding() {
     setError('')
   }
 
-  function toggleField(value) {
-    const current = form.qualificationSettings.requiredFields
-    const requiredFields = current.includes(value)
-      ? current.filter(field => field !== value)
-      : [...current, value]
-    updateQualification('requiredFields', requiredFields)
+  function setStandardField(value, mode) {
+    const settings = form.qualificationSettings
+    const enabled = new Set(settings.enabledFields || settings.requiredFields || [])
+    const required = new Set(settings.requiredFields || [])
+
+    if (mode === 'off') {
+      enabled.delete(value)
+      required.delete(value)
+    } else {
+      enabled.add(value)
+      if (mode === 'required') required.add(value)
+      else required.delete(value)
+    }
+
+    updateQualification('enabledFields', [...enabled])
+    updateQualification('requiredFields', [...required])
+  }
+
+  function addCustomField(field = customFieldDraft) {
+    const label = String(field.label || '').trim()
+    if (!label) {
+      setError('Give the additional field a name first.')
+      return
+    }
+
+    const key = String(field.key || label)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+
+    const current = form.qualificationSettings.customFields || []
+    if (current.some(item => item.key === key)) {
+      setError('That field already exists. Choose a different name.')
+      return
+    }
+
+    updateQualification('customFields', [
+      ...current,
+      { key, label, description: field.description || '', required: Boolean(field.required) },
+    ])
+    setCustomFieldDraft({ label: '', required: false })
+    setError('')
+  }
+
+  function updateCustomField(index, changes) {
+    const fields = [...(form.qualificationSettings.customFields || [])]
+    fields[index] = { ...fields[index], ...changes }
+    updateQualification('customFields', fields)
+  }
+
+  function removeCustomField(index) {
+    updateQualification(
+      'customFields',
+      (form.qualificationSettings.customFields || []).filter((_, i) => i !== index)
+    )
   }
 
   function next() {
@@ -179,7 +231,10 @@ export default function Onboarding() {
           businessDescription: form.businessDescription.trim(),
           services: form.services.trim(),
           areas: form.areas.trim(),
-          additionalInformation: form.qualificationSettings.additionalInformation.trim(),
+          additionalInformation: (form.qualificationSettings.customFields || [])
+            .map(field => field.label + (field.description ? ': ' + field.description : '') + (field.required ? ' (required)' : ' (optional)'))
+            .join('\n'),
+          existingCustomFields: form.qualificationSettings.customFields || [],
           hotCriteria,
           warmCriteria,
         }),
@@ -201,11 +256,64 @@ export default function Onboarding() {
   }
 
   function applyTrainingSuggestions() {
-    if (!trainingSuggestions) return
+    if (trainingSuggestions == null) return
+
+    const existingFields = form.qualificationSettings.customFields || []
+
+    function normaliseFieldText(value) {
+      return String(value || '')
+        .toLowerCase()
+        .replace(/&/g, ' and ')
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+    }
+
+    function fieldWords(value) {
+      return new Set(normaliseFieldText(value).split(/\s+/).filter(Boolean))
+    }
+
+    function fieldsOverlap(suggested, existing) {
+      const suggestedText = normaliseFieldText(
+        suggested.label + ' ' + (suggested.description || '')
+      )
+      const existingText = normaliseFieldText(
+        existing.label + ' ' + (existing.description || '')
+      )
+
+      if (!suggestedText || !existingText) return false
+
+      if (
+        normaliseFieldText(suggested.label) === normaliseFieldText(existing.label)
+      ) {
+        return true
+      }
+
+      const suggestedWords = fieldWords(suggestedText)
+      const existingWords = fieldWords(existingText)
+      const sharedWords = [...suggestedWords].filter(word => existingWords.has(word))
+
+      return sharedWords.length >= 2 &&
+        sharedWords.length / Math.min(suggestedWords.size, existingWords.size) >= 0.6
+    }
+
+    const suggestedFields = (trainingSuggestions.customFields || [])
+      .filter(field => field.label && field.key)
+      .filter(field => {
+        const duplicateKey = existingFields.some(existing => existing.key === field.key)
+        const duplicateInformation = existingFields.some(existing => fieldsOverlap(field, existing))
+        return !duplicateKey && !duplicateInformation
+      })
+      .map(field => ({
+        key: field.key,
+        label: field.label,
+        description: field.description || '',
+        required: Boolean(field.required),
+      }))
 
     updateQualification('hotCriteria', trainingSuggestions.hotCriteria)
     updateQualification('warmCriteria', trainingSuggestions.warmCriteria)
-    updateQualification('customFields', trainingSuggestions.customFields || [])
+    updateQualification('customFields', [...existingFields, ...suggestedFields])
+
     setTrainingSuggestions(null)
   }
 
@@ -291,49 +399,6 @@ export default function Onboarding() {
 
               <Field label="What makes an enquiry genuine, but not ready yet?" hint="These become useful WARM opportunities that should not be ignored." value={form.qualificationSettings.warmCriteria} onChange={value => updateQualification('warmCriteria', value)} placeholder="For example: researching options, planning work later, needs more information..." multiline rows={6} />
 
-              <button type="button" className="employeeAiButton" onClick={trainQualification} disabled={training}>
-                {training ? 'Training your AI employee...' : '✨ Help me turn this into AI rules'}
-              </button>
-
-              {trainingSuggestions && (
-                <div className="employeeTrainingResult">
-                  <div className="employeeTrainingResultHeader">
-                    <span>AI TRAINING SUGGESTION</span>
-                    <strong>Here's what I've learned</strong>
-                  </div>
-
-                  <div className="employeeTrainingRule">
-                    <span>🔥 HOT</span>
-                    <p>{trainingSuggestions.hotCriteria}</p>
-                  </div>
-
-                  <div className="employeeTrainingRule">
-                    <span>🟠 WARM</span>
-                    <p>{trainingSuggestions.warmCriteria}</p>
-                  </div>
-
-                  {trainingSuggestions.customFields?.length ? (
-                    <div className="employeeTrainingRule">
-                      <span>📋 BUSINESS-SPECIFIC INFORMATION</span>
-                      {trainingSuggestions.customFields.map(field => (
-                        <p key={field.key}>✓ <strong>{field.label}</strong> {field.required ? '(required)' : '(optional)'}</p>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  <p className="employeeTip"><strong>Does this look right?</strong> These suggestions won't be saved until you approve them.</p>
-
-                  <div className="employeeTrainingActions">
-                    <button type="button" className="employeePrimaryAction" onClick={applyTrainingSuggestions}>
-                      ✓ Use these rules
-                    </button>
-                    <button type="button" className="employeeSecondaryAction" onClick={() => setTrainingSuggestions(null)}>
-                      Keep my wording
-                    </button>
-                  </div>
-                </div>
-              )}
-
               <p className="employeeTip"><strong>Keep it natural.</strong> Write this exactly as you'd explain it to a new salesperson joining your team.</p>
             </StepFrame>
           )}
@@ -361,17 +426,107 @@ export default function Onboarding() {
                 ))}
               </div>
 
-              <div className="employeeSectionLabel">Optional information</div>
+              <div className="employeeSectionLabel">Other information</div>
+              <p className="employeeTip">Choose whether each standard field should be collected and whether it must be answered before handover.</p>
               <div className="employeeFieldGrid">
-                {fieldOptions.slice(4).map(([value, label, description]) => (
-                  <button type="button" key={value} className={'employeeFieldOption ' + (form.qualificationSettings.requiredFields.includes(value) ? 'selected' : '')} onClick={() => toggleField(value)}>
-                    <span className="employeeCheckbox">{form.qualificationSettings.requiredFields.includes(value) ? '✓' : ''}</span>
-                    <span><strong>{label}</strong><small>{description}</small></span>
-                  </button>
-                ))}
+                {fieldOptions.slice(4).map(([value, label, description]) => {
+                  const enabled = (form.qualificationSettings.enabledFields || form.qualificationSettings.requiredFields).includes(value)
+                  const required = form.qualificationSettings.requiredFields.includes(value)
+                  return (
+                    <div key={value} className={'employeeFieldOption ' + (enabled ? 'selected' : '')}>
+                      <span><strong>{label}</strong><small>{description}</small></span>
+                      <select aria-label={label + ' collection setting'} value={!enabled ? 'off' : required ? 'required' : 'optional'} onChange={e => setStandardField(value, e.target.value)}>
+                        <option value="off">Don't collect</option>
+                        <option value="optional">Optional</option>
+                        <option value="required">Required</option>
+                      </select>
+                    </div>
+                  )
+                })}
               </div>
 
-              <Field label="Additional information" hint="Is there anything specific to your business that I should collect when qualifying an enquiry?" value={form.qualificationSettings.additionalInformation || ''} onChange={value => updateQualification('additionalInformation', value)} placeholder="For example: roof type, number of vehicles, event date, number of employees, project size, preferred appointment time..." multiline rows={5} />
+              <div className="employeeSectionLabel">Business-specific information</div>
+              <p className="employeeTip">Add the extra details that matter to your business. Each field can be optional or required before handover.</p>
+
+              {(form.qualificationSettings.customFields || []).map((field, index) => (
+                <div className="employeeCustomField" key={field.key || index}>
+                  <label>
+                    <span>Field name</span>
+                    <input value={field.label || ''} onChange={e => updateCustomField(index, { label: e.target.value })} />
+                  </label>
+                  <label>
+                    <span>What should I collect?</span>
+                    <input value={field.description || ''} placeholder="Optional guidance for the AI employee" onChange={e => updateCustomField(index, { description: e.target.value })} />
+                  </label>
+                  <label>
+                    <span>Requirement</span>
+                    <select value={field.required ? 'required' : 'optional'} onChange={e => updateCustomField(index, { required: e.target.value === 'required' })}>
+                      <option value="optional">Optional</option>
+                      <option value="required">Required before handover</option>
+                    </select>
+                  </label>
+                  <button type="button" className="employeeSecondaryAction" onClick={() => removeCustomField(index)}>Remove field</button>
+                </div>
+              ))}
+
+              <div className="employeeCustomFieldDraft">
+                <label>
+                  <span>New field name</span>
+                  <input value={customFieldDraft.label} onChange={e => setCustomFieldDraft(prev => ({ ...prev, label: e.target.value }))} placeholder="e.g. Vehicle required" />
+                </label>
+                <label>
+                  <span>Requirement</span>
+                  <select value={customFieldDraft.required ? 'required' : 'optional'} onChange={e => setCustomFieldDraft(prev => ({ ...prev, required: e.target.value === 'required' }))}>
+                    <option value="optional">Optional</option>
+                    <option value="required">Required before handover</option>
+                  </select>
+                </label>
+                <button type="button" className="employeePrimaryAction" onClick={() => addCustomField()}>+ Add field</button>
+              </div>
+
+              <button type="button" className="employeeAiButton" onClick={trainQualification} disabled={training}>
+                {training ? 'Training your AI employee...' : '✨ Help me turn this into AI rules'}
+              </button>
+
+              {trainingSuggestions && (
+                <div className="employeeTrainingResult">
+                  <div className="employeeTrainingResultHeader">
+                    <span>AI TRAINING SUGGESTION</span>
+                    <strong>Here's what I've learned</strong>
+                  </div>
+
+                  <div className="employeeTrainingRule">
+                    <span>🔥 HOT</span>
+                    <p>{trainingSuggestions.hotCriteria}</p>
+                  </div>
+
+                  <div className="employeeTrainingRule">
+                    <span>🟠 WARM</span>
+                    <p>{trainingSuggestions.warmCriteria}</p>
+                  </div>
+
+                  {trainingSuggestions.customFields?.length ? (
+                    <div className="employeeTrainingRule">
+                      <span>📋 BUSINESS-SPECIFIC INFORMATION</span>
+                      {trainingSuggestions.customFields.map(field => (
+                        <p key={field.key}>✓ <strong>{field.label}</strong> {field.required ? '(required before handover)' : '(optional)'}</p>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  <p className="employeeTip"><strong>Does this look right?</strong> These suggestions won't be saved until you approve them.</p>
+
+                  <div className="employeeTrainingActions">
+                    <button type="button" className="employeePrimaryAction" onClick={applyTrainingSuggestions}>
+                      ✓ Use these rules
+                    </button>
+                    <button type="button" className="employeeSecondaryAction" onClick={() => setTrainingSuggestions(null)}>
+                      Keep my wording
+                    </button>
+                  </div>
+                </div>
+              )}
+
 
               <p className="employeeTip"><strong>Keep it focused.</strong> Only make optional information a requirement when your team genuinely needs it before taking over an enquiry.</p>
               <Field label="When should I hand an enquiry to your team?" hint="This is your final handover rule. The four core fields above are always required." value={form.qualificationSettings.readyCriteria} onChange={value => updateQualification('readyCriteria', value)} placeholder="For example: all required information is collected and the customer has provided a phone number or email..." multiline rows={5} />
@@ -409,7 +564,7 @@ export default function Onboarding() {
                 <Summary label="Services" value={listSummary(form.services)} />
                 <Summary label="Coverage" value={listSummary(form.areas)} />
                 <Summary label="Lead priorities" value={form.qualificationSettings.hotCriteria || 'Not set yet'} />
-                <Summary label="Qualification" value={`${form.qualificationSettings.requiredFields.length} required information fields`} />
+                <Summary label="Qualification" value={`${form.qualificationSettings.requiredFields.length} required standard fields and ${(form.qualificationSettings.customFields || []).filter(field => field.required).length} required business-specific fields`} />
                 <Summary label="Communication" value={toneLabel(form.tone)} />
                 <Summary label="Handover" value={form.qualificationSettings.readyCriteria || 'Based on your required information'} />
               </div>

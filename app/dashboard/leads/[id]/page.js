@@ -95,6 +95,22 @@ export default async function LeadDetails({ params }) {
           archived={Boolean(lead.archived_at)}
         />
 
+        {Object.keys(lead.custom_fields || {}).length > 0 && (
+          <section className="card" style={{ marginTop: 24 }}>
+            <h2>Additional qualification details</h2>
+            <div className="detailList">
+              {Object.entries(lead.custom_fields || {}).map(([key, value]) => (
+                <div key={key}>
+                  <small>{key.replace(/_/g, ' ')}</small>
+                  <strong>
+                    {value == null || value === '' ? 'Not provided' : String(value)}
+                  </strong>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className="leadDetailGrid">
           <section className="card">
             <h2>Contact details</h2>

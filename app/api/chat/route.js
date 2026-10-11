@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '../../../lib/supabase/admin'
 import { runLeadPilot } from '../../../lib/ai'
+import { evaluateQualification } from '../../../lib/qualification'
 
 export async function GET(request) {
   const slug = new URL(request.url).searchParams.get('slug')
@@ -69,26 +70,24 @@ export async function POST(request) {
       }
 
       const qualificationSettings = assistant.qualification_settings || {}
-      const requiredFields = Array.isArray(qualificationSettings.requiredFields)
-        ? qualificationSettings.requiredFields
-        : ['name', 'contact', 'service', 'enquiry']
 
-      const qualificationValues = {
-        name: Boolean(name),
-        contact: Boolean(email || phone),
-        service: Boolean(service),
-        enquiry: Boolean(enquiry),
-        location: Boolean(location),
-        timescale: Boolean(timescale),
-        budget: Boolean(budget),
-        quantity: Boolean(quantity),
-      }
+      const qualificationResult = evaluateQualification({
+        qualificationSettings,
+        lead: {
+          name,
+          email,
+          phone,
+          service,
+          enquiry,
+          location,
+          timescale,
+          budget,
+          quantity,
+          custom_fields: customFields,
+        },
+      })
 
-      const qualificationComplete =
-        Boolean(lead.qualification_complete) &&
-        requiredFields.every(
-          (field) => qualificationValues[field] === true
-        )
+      const qualificationComplete = qualificationResult.qualificationComplete
 
       const payload={
         organization_id:assistant.organization_id,
@@ -105,7 +104,7 @@ export async function POST(request) {
         custom_fields:customFields,
         summary:lead.summary || existingLead?.summary || null,
         score:lead.score ?? existingLead?.score ?? null,
-        ready_to_contact:qualificationComplete && Boolean(email || phone)
+        ready_to_contact:qualificationResult.readyToContact
       }
 
       if(conversation.lead_id){

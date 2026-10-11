@@ -89,6 +89,9 @@ export async function POST(request) {
       services: body.services?.trim() || '',
       areas: body.areas?.trim() || '',
       additionalInformation: body.additionalInformation?.trim() || '',
+      existingCustomFields: Array.isArray(body.existingCustomFields)
+       ? body.existingCustomFields
+       : [],
       hotCriteria: body.hotCriteria?.trim() || '',
       warmCriteria: body.warmCriteria?.trim() || '',
     })

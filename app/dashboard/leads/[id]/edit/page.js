@@ -14,11 +14,16 @@ export default function EditLeadPage() {
     name: '',
     email: '',
     phone: '',
+    location: '',
     service: '',
     timescale: '',
+    budget: '',
+    quantity: '',
     enquiry: '',
+    customFields: {},
   })
 
+  const [customFields, setCustomFields] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -27,7 +32,6 @@ export default function EditLeadPage() {
     async function loadLead() {
       try {
         const response = await fetch(`/api/leads/${leadId}`)
-
         const data = await response.json()
 
         if (!response.ok) {
@@ -35,14 +39,26 @@ export default function EditLeadPage() {
         }
 
         const lead = data.lead
+        const settings = data.qualificationSettings || {}
+
+        setCustomFields(
+          Array.isArray(settings.customFields) ? settings.customFields : []
+        )
 
         setForm({
           name: lead.name || '',
           email: lead.email || '',
           phone: lead.phone || '',
+          location: lead.location || '',
           service: lead.service || '',
           timescale: lead.timescale || '',
+          budget: lead.budget || '',
+          quantity: lead.quantity == null ? '' : String(lead.quantity),
           enquiry: lead.enquiry || '',
+          customFields:
+            lead.custom_fields && typeof lead.custom_fields === 'object'
+              ? lead.custom_fields
+              : {},
         })
       } catch (err) {
         setError(err.message || 'Unable to load lead')
@@ -55,9 +71,16 @@ export default function EditLeadPage() {
   }, [leadId])
 
   function updateField(field, value) {
+    setForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  function updateCustomField(key, value) {
     setForm(prev => ({
       ...prev,
-      [field]: value,
+      customFields: {
+        ...prev.customFields,
+        [key]: value,
+      },
     }))
   }
 
@@ -75,9 +98,7 @@ export default function EditLeadPage() {
     try {
       const response = await fetch(`/api/leads/${leadId}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'edit',
           ...form,
@@ -111,16 +132,11 @@ export default function EditLeadPage() {
   return (
     <main className={styles.page}>
       <div className={styles.container}>
-
         <div className={styles.topBar}>
           <div>
-            <Link
-              href={`/dashboard/leads/${leadId}`}
-              className={styles.backLink}
-            >
+            <Link href={`/dashboard/leads/${leadId}`} className={styles.backLink}>
               ← Back to lead
             </Link>
-
             <div className={styles.heading}>
               <span className={styles.eyebrow}>LEADS</span>
               <h1>Edit lead</h1>
@@ -130,7 +146,6 @@ export default function EditLeadPage() {
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-
           <section className={styles.card}>
             <div className={styles.cardHeader}>
               <div>
@@ -140,36 +155,25 @@ export default function EditLeadPage() {
             </div>
 
             <div className={styles.grid}>
-              <div className={styles.field}>
-                <label htmlFor="name">Name <span>*</span></label>
-                <input
-                  id="name"
-                  value={form.name}
-                  onChange={e => updateField('name', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="email">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  value={form.email}
-                  onChange={e => updateField('email', e.target.value)}
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="phone">Phone</label>
-                <input
-                  id="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={e => updateField('phone', e.target.value)}
-                />
-              </div>
-
+              {[
+                ['name', 'Name'],
+                ['email', 'Email'],
+                ['phone', 'Phone'],
+                ['location', 'Location'],
+              ].map(([key, label]) => (
+                <div className={styles.field} key={key}>
+                  <label htmlFor={key}>
+                    {label}{key === 'name' && <span> *</span>}
+                  </label>
+                  <input
+                    id={key}
+                    type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'}
+                    value={form[key]}
+                    onChange={e => updateField(key, e.target.value)}
+                    required={key === 'name'}
+                  />
+                </div>
+              ))}
             </div>
           </section>
 
@@ -177,65 +181,79 @@ export default function EditLeadPage() {
             <div className={styles.cardHeader}>
               <div>
                 <h2>Lead details</h2>
-                <p>Update the enquiry information. Meaningful changes will trigger an AI reassessment.</p>
+                <p>Update the enquiry information. Meaningful changes trigger AI reassessment.</p>
               </div>
             </div>
 
             <div className={styles.grid}>
-              <div className={styles.field}>
-                <label htmlFor="service">Service</label>
-                <input
-                  id="service"
-                  value={form.service}
-                  onChange={e => updateField('service', e.target.value)}
-                />
-              </div>
-
-
-              <div className={styles.field}>
-                <label htmlFor="timescale">Timescale</label>
-                <input
-                  id="timescale"
-                  value={form.timescale}
-                  onChange={e => updateField('timescale', e.target.value)}
-                />
-              </div>
+              {[
+                ['service', 'Service or product'],
+                ['timescale', 'Timescale'],
+                ['budget', 'Budget'],
+                ['quantity', 'Quantity'],
+              ].map(([key, label]) => (
+                <div className={styles.field} key={key}>
+                  <label htmlFor={key}>{label}</label>
+                  <input
+                    id={key}
+                    value={form[key]}
+                    onChange={e => updateField(key, e.target.value)}
+                  />
+                </div>
+              ))}
             </div>
 
             <div className={styles.fullField}>
-              <label htmlFor="enquiry">Enquiry</label>
+              <label htmlFor="enquiry">Enquiry details</label>
               <textarea
                 id="enquiry"
-                rows="7"
+                rows="5"
                 value={form.enquiry}
                 onChange={e => updateField('enquiry', e.target.value)}
               />
             </div>
           </section>
 
-          {error && (
-            <div className={styles.error}>
-              {error}
-            </div>
+          {customFields.length > 0 && (
+            <section className={styles.card}>
+              <div className={styles.cardHeader}>
+                <div>
+                  <h2>Additional qualification details</h2>
+                  <p>Custom questions configured in Training Hub for this business.</p>
+                </div>
+              </div>
+
+              {customFields.map(field => (
+                <div className={styles.fullField} key={field.key}>
+                  <label htmlFor={`custom-${field.key}`}>
+                    {field.label || field.key}
+                    {field.required ? ' *' : ''}
+                  </label>
+                  {field.description && <p>{field.description}</p>}
+                  <textarea
+                    id={`custom-${field.key}`}
+                    rows="2"
+                    value={form.customFields[field.key] == null
+                      ? ''
+                      : String(form.customFields[field.key])}
+                    onChange={e => updateCustomField(field.key, e.target.value)}
+                    required={Boolean(field.required)}
+                  />
+                </div>
+              ))}
+            </section>
           )}
 
+          {error && <div className={styles.error}>{error}</div>}
+
           <div className={styles.actions}>
-            <Link
-              href={`/dashboard/leads/${leadId}`}
-              className={styles.cancel}
-            >
+            <Link href={`/dashboard/leads/${leadId}`} className={styles.cancel}>
               Cancel
             </Link>
-
-            <button
-              type="submit"
-              className={styles.save}
-              disabled={saving}
-            >
+            <button type="submit" className={styles.save} disabled={saving}>
               {saving ? 'Saving and assessing...' : 'Save changes'}
             </button>
           </div>
-
         </form>
       </div>
     </main>
