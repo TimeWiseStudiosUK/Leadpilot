@@ -11,9 +11,12 @@
   "dependencies": {
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
-    "next": "^15.5.26",
+    "next": "^15.5.27",
     "openai": "latest",
     "react": "19.1.0",
     "react-dom": "19.1.0"
+  },
+  "overrides": {
+    "postcss": "8.5.23"
   }
 }

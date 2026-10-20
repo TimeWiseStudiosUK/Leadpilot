@@ -14,8 +14,8 @@ const defaultForm = {
   greeting: '',
   tone: 'friendly, professional and concise',
   qualificationSettings: {
-    requiredFields: ['name', 'contact', 'service', 'enquiry'],
-    enabledFields: ['name', 'contact', 'service', 'enquiry'],
+    requiredFields: ['name', 'contact', 'enquiry'],
+    enabledFields: ['name', 'contact', 'enquiry'],
     hotCriteria: '',
     warmCriteria: '',
     readyCriteria: '',
@@ -37,12 +37,7 @@ const steps = [
 const fieldOptions = [
   ['name', 'Customer name', 'Who am I speaking to?'],
   ['contact', 'Phone or email', 'How can your team contact them?'],
-  ['service', 'Service or product', 'What are they looking for?'],
   ['enquiry', 'Enquiry details', 'What exactly do they need help with?'],
-  ['location', 'Location', 'Where is the customer or opportunity?'],
-  ['timescale', 'Timescale', 'When do they need it?'],
-  ['budget', 'Budget', 'What budget or spend range are they working with?'],
-  ['quantity', 'Quantity', 'How many products, services, places or units do they need?'],
 ];
 function normaliseAssistant(organisation, assistant) {
   return {
@@ -74,6 +69,7 @@ export default function Onboarding() {
   const [error, setError] = useState('')
   const [training, setTraining] = useState(false)
   const [trainingSuggestions, setTrainingSuggestions] = useState(null)
+  const [selectedTrainingSuggestions, setSelectedTrainingSuggestions] = useState({ hotCriteria: true, warmCriteria: true, customFields: [] })
   const [step, setStep] = useState(0)
   const [existingBusiness, setExistingBusiness] = useState(false)
   const [form, setForm] = useState(defaultForm)
@@ -247,6 +243,11 @@ export default function Onboarding() {
         return
       }
 
+      setSelectedTrainingSuggestions({
+        hotCriteria: true,
+        warmCriteria: true,
+        customFields: [],
+      })
       setTrainingSuggestions(data.suggestions)
     } catch {
       setError('Could not generate AI training suggestions. Please try again.')
@@ -255,9 +256,10 @@ export default function Onboarding() {
     }
   }
 
-  function applyTrainingSuggestions() {
-    if (trainingSuggestions == null) return
+  function applyTrainingSuggestions(acceptAll = false) {
+    if (!trainingSuggestions) return
 
+    const selected = selectedTrainingSuggestions
     const existingFields = form.qualificationSettings.customFields || []
 
     function normaliseFieldText(value) {
@@ -296,8 +298,14 @@ export default function Onboarding() {
         sharedWords.length / Math.min(suggestedWords.size, existingWords.size) >= 0.6
     }
 
+    const selectedKeys = new Set(
+      acceptAll
+        ? (trainingSuggestions.customFields || []).map(field => field.key)
+        : selected.customFields
+    )
+
     const suggestedFields = (trainingSuggestions.customFields || [])
-      .filter(field => field.label && field.key)
+      .filter(field => field.label && field.key && selectedKeys.has(field.key))
       .filter(field => {
         const duplicateKey = existingFields.some(existing => existing.key === field.key)
         const duplicateInformation = existingFields.some(existing => fieldsOverlap(field, existing))
@@ -310,11 +318,26 @@ export default function Onboarding() {
         required: Boolean(field.required),
       }))
 
-    updateQualification('hotCriteria', trainingSuggestions.hotCriteria)
-    updateQualification('warmCriteria', trainingSuggestions.warmCriteria)
-    updateQualification('customFields', [...existingFields, ...suggestedFields])
+    if (
+      trainingSuggestions.hotCriteria?.trim() &&
+      (acceptAll || selected.hotCriteria)
+    ) {
+      updateQualification('hotCriteria', trainingSuggestions.hotCriteria)
+    }
+
+    if (
+      trainingSuggestions.warmCriteria?.trim() &&
+      (acceptAll || selected.warmCriteria)
+    ) {
+      updateQualification('warmCriteria', trainingSuggestions.warmCriteria)
+    }
+
+    if (suggestedFields.length) {
+      updateQualification('customFields', [...existingFields, ...suggestedFields])
+    }
 
     setTrainingSuggestions(null)
+    setSelectedTrainingSuggestions({ hotCriteria: true, warmCriteria: true, customFields: [] })
   }
 
   async function finish() {
@@ -417,32 +440,34 @@ export default function Onboarding() {
           {step === 4 && (
             <StepFrame eyebrow="QUALIFICATION" title="What information should I collect?" intro="Some information is essential for every enquiry. The rest can be tailored to your business.">
               <div className="employeeSectionLabel">Always required</div>
-              <div className="employeeFieldGrid">
-                {fieldOptions.slice(0, 4).map(([value, label, description]) => (
-                  <div key={value} className="employeeFieldOption selected">
-                    <span className="employeeCheckbox">✓</span>
-                    <span><strong>{label}</strong><small>{description}</small></span>
+              <div className="employeeCoreGrid">
+                {fieldOptions.map(([value, label, description], index) => (
+                  <div className="employeeCoreCard" key={value}>
+                    <div className="employeeCoreTop">
+                      <span className="employeeCoreIcon" aria-hidden="true">
+                        {index === 0 ? (
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="8" r="3.5" />
+                            <path d="M5 20v-1.5a7 7 0 0 1 14 0V20Z" />
+                          </svg>
+                        ) : index === 1 ? (
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M7 3h3l2 5-2 1.5a15 15 0 0 0 4.5 4.5L16 12l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 5 5a2 2 0 0 1 2-2Z" />
+                          </svg>
+                        ) : (
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.5a9 9 0 0 1-.9-4A8.5 8.5 0 1 1 21 11.5Z" />
+                          </svg>
+                        )}
+                      </span>
+                    </div>
+                    <div className="employeeCoreText">
+                      <strong>{label}</strong>
+                      <small>{description}</small>
+                    </div>
+                    <div className="employeeCoreRequired">✓ <span>Required</span></div>
                   </div>
                 ))}
-              </div>
-
-              <div className="employeeSectionLabel">Other information</div>
-              <p className="employeeTip">Choose whether each standard field should be collected and whether it must be answered before handover.</p>
-              <div className="employeeFieldGrid">
-                {fieldOptions.slice(4).map(([value, label, description]) => {
-                  const enabled = (form.qualificationSettings.enabledFields || form.qualificationSettings.requiredFields).includes(value)
-                  const required = form.qualificationSettings.requiredFields.includes(value)
-                  return (
-                    <div key={value} className={'employeeFieldOption ' + (enabled ? 'selected' : '')}>
-                      <span><strong>{label}</strong><small>{description}</small></span>
-                      <select aria-label={label + ' collection setting'} value={!enabled ? 'off' : required ? 'required' : 'optional'} onChange={e => setStandardField(value, e.target.value)}>
-                        <option value="off">Don't collect</option>
-                        <option value="optional">Optional</option>
-                        <option value="required">Required</option>
-                      </select>
-                    </div>
-                  )
-                })}
               </div>
 
               <div className="employeeSectionLabel">Business-specific information</div>
@@ -492,36 +517,88 @@ export default function Onboarding() {
                 <div className="employeeTrainingResult">
                   <div className="employeeTrainingResultHeader">
                     <span>AI TRAINING SUGGESTION</span>
-                    <strong>Here's what I've learned</strong>
+                    <strong>Review each proposed change</strong>
                   </div>
 
-                  <div className="employeeTrainingRule">
-                    <span>🔥 HOT</span>
-                    <p>{trainingSuggestions.hotCriteria}</p>
-                  </div>
+                  <label className="employeeTrainingRule">
+                    <input
+                      type="checkbox"
+                      checked={selectedTrainingSuggestions.hotCriteria}
+                      onChange={event => setSelectedTrainingSuggestions(prev => ({
+                        ...prev,
+                        hotCriteria: event.target.checked,
+                      }))}
+                    />
+                    <span>🔥 HOT qualification rule</span>
+                    <p>{trainingSuggestions.hotCriteria || 'No HOT rule suggested.'}</p>
+                  </label>
 
-                  <div className="employeeTrainingRule">
-                    <span>🟠 WARM</span>
-                    <p>{trainingSuggestions.warmCriteria}</p>
-                  </div>
+                  <label className="employeeTrainingRule">
+                    <input
+                      type="checkbox"
+                      checked={selectedTrainingSuggestions.warmCriteria}
+                      onChange={event => setSelectedTrainingSuggestions(prev => ({
+                        ...prev,
+                        warmCriteria: event.target.checked,
+                      }))}
+                    />
+                    <span>🟠 WARM qualification rule</span>
+                    <p>{trainingSuggestions.warmCriteria || 'No WARM rule suggested.'}</p>
+                  </label>
 
                   {trainingSuggestions.customFields?.length ? (
                     <div className="employeeTrainingRule">
                       <span>📋 BUSINESS-SPECIFIC INFORMATION</span>
                       {trainingSuggestions.customFields.map(field => (
-                        <p key={field.key}>✓ <strong>{field.label}</strong> {field.required ? '(required before handover)' : '(optional)'}</p>
+                        <label key={field.key} style={{ display: 'block', marginTop: '10px' }}>
+                          <input
+                            type="checkbox"
+                            checked={selectedTrainingSuggestions.customFields.includes(field.key)}
+                            onChange={event => setSelectedTrainingSuggestions(prev => ({
+                              ...prev,
+                              customFields: event.target.checked
+                                ? [...prev.customFields, field.key]
+                                : prev.customFields.filter(key => key !== field.key),
+                            }))}
+                          />
+                          {' '}
+                          <strong>{field.label}</strong>
+                          {' '}{field.required ? '(required before handover)' : '(optional)'}
+                          {field.description ? <p>{field.description}</p> : null}
+                        </label>
                       ))}
                     </div>
                   ) : null}
 
-                  <p className="employeeTip"><strong>Does this look right?</strong> These suggestions won't be saved until you approve them.</p>
+                  <p className="employeeTip">
+                    <strong>Nothing changes until you approve it.</strong>
+                    Select the rules and fields you want to apply. Each item is independent.
+                  </p>
 
                   <div className="employeeTrainingActions">
-                    <button type="button" className="employeePrimaryAction" onClick={applyTrainingSuggestions}>
-                      ✓ Use these rules
+                    <button
+                      type="button"
+                      className="employeePrimaryAction"
+                      onClick={() => applyTrainingSuggestions(false)}
+                    >
+                      ✓ Accept selected
                     </button>
-                    <button type="button" className="employeeSecondaryAction" onClick={() => setTrainingSuggestions(null)}>
-                      Keep my wording
+                    <button
+                      type="button"
+                      className="employeePrimaryAction"
+                      onClick={() => applyTrainingSuggestions(true)}
+                    >
+                      Accept all changes
+                    </button>
+                    <button
+                      type="button"
+                      className="employeeSecondaryAction"
+                      onClick={() => {
+                        setTrainingSuggestions(null)
+                        setSelectedTrainingSuggestions({ hotCriteria: true, warmCriteria: true, customFields: [] })
+                      }}
+                    >
+                      Discard suggestions
                     </button>
                   </div>
                 </div>

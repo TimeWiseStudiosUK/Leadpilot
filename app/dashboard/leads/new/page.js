@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
@@ -24,7 +24,64 @@ export default function NewLeadPage() {
   })
 
   const [saving, setSaving] = useState(false)
+  const [loadingSettings, setLoadingSettings] = useState(true)
+  const [settingsLoadFailed, setSettingsLoadFailed] = useState(false)
   const [error, setError] = useState('')
+  const [qualificationSettings, setQualificationSettings] = useState({
+    requiredFields: ['name', 'contact', 'enquiry'],
+    enabledFields: ['name', 'contact', 'enquiry'],
+    customFields: [],
+  })
+  const [customFields, setCustomFields] = useState({})
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadSettings() {
+      try {
+        const response = await fetch('/api/leads')
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Unable to load qualification settings')
+        }
+
+        if (!cancelled) {
+          setQualificationSettings(data.qualificationSettings)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setSettingsLoadFailed(true)
+          setError(err.message || 'Unable to load qualification settings')
+        }
+      } finally {
+        if (!cancelled) setLoadingSettings(false)
+      }
+    }
+
+    loadSettings()
+    return () => { cancelled = true }
+  }, [])
+
+  const enabledFields = new Set([
+    'name',
+    'contact',
+    'email',
+    'phone',
+    'enquiry',
+    ...(qualificationSettings.enabledFields || []),
+    ...(qualificationSettings.requiredFields || []),
+  ])
+  const requiredFields = new Set([
+    'name',
+    'contact',
+    'enquiry',
+    ...(qualificationSettings.requiredFields || []),
+  ])
+
+  function updateCustomField(key, value) {
+    setCustomFields(prev => ({ ...prev, [key]: value }))
+  }
 
   function updateField(field, value) {
     setForm(prev => ({
@@ -37,9 +94,36 @@ export default function NewLeadPage() {
     e.preventDefault()
     setError('')
 
+    if (loadingSettings) {
+      setError('Please wait while the business settings load.')
+      return
+    }
+
+    if (settingsLoadFailed) {
+      setError('Business qualification settings could not be loaded. Please refresh the page and try again.')
+      return
+    }
+
     if (!form.name.trim()) {
       setError('Please enter the lead name.')
       return
+    }
+
+    if (!form.email.trim() && !form.phone.trim()) {
+      setError('Please enter a phone number or email address.')
+      return
+    }
+
+    if (!form.enquiry.trim()) {
+      setError('Please enter the enquiry details.')
+      return
+    }
+
+    for (const field of qualificationSettings.customFields || []) {
+      if (field.required && !String(customFields[field.key] || '').trim()) {
+        setError(`Please complete ${field.label || field.key}.`)
+        return
+      }
     }
 
     setSaving(true)
@@ -50,7 +134,7 @@ export default function NewLeadPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, customFields }),
       })
 
       const data = await response.json()
@@ -86,6 +170,8 @@ export default function NewLeadPage() {
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
+
+          {loadingSettings && <p>Loading business qualification settings...</p>}
 
           <section className={styles.card}>
             <div className={styles.cardHeader}>
@@ -126,14 +212,7 @@ export default function NewLeadPage() {
                 />
               </div>
 
-              <div className={styles.field}>
-                <label htmlFor="location">Location</label>
-                <input
-                  id="location"
-                  value={form.location}
-                  onChange={e => updateField('location', e.target.value)}
-                />
-              </div>
+
             </div>
           </section>
 
@@ -146,51 +225,17 @@ export default function NewLeadPage() {
             </div>
 
             <div className={styles.grid}>
-              <div className={styles.field}>
-                <label htmlFor="service">Service or product</label>
-                <input
-                  id="service"
-                  value={form.service}
-                  onChange={e => updateField('service', e.target.value)}
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="timescale">Timescale</label>
-                <input
-                  id="timescale"
-                  value={form.timescale}
-                  onChange={e => updateField('timescale', e.target.value)}
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="budget">Budget</label>
-                <input
-                  id="budget"
-                  value={form.budget}
-                  onChange={e => updateField('budget', e.target.value)}
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="quantity">Quantity</label>
-                <input
-                  id="quantity"
-                  value={form.quantity}
-                  onChange={e => updateField('quantity', e.target.value)}
-                />
-              </div>
 
             </div>
 
             <div className={styles.fullField}>
-              <label htmlFor="enquiry">Enquiry details</label>
+              <label htmlFor="enquiry">Enquiry details *</label>
               <textarea
                 id="enquiry"
                 rows="5"
                 value={form.enquiry}
                 onChange={e => updateField('enquiry', e.target.value)}
+                required
               />
             </div>
 
@@ -206,6 +251,33 @@ export default function NewLeadPage() {
           </section>
 
 
+
+          {(qualificationSettings.customFields || []).length > 0 && (
+            <section className={styles.card}>
+              <div className={styles.cardHeader}>
+                <div>
+                  <h2>Additional qualification details</h2>
+                  <p>Custom questions configured for this business.</p>
+                </div>
+              </div>
+
+              {(qualificationSettings.customFields || []).map(field => (
+                <div className={styles.fullField} key={field.key}>
+                  <label htmlFor={`custom-${field.key}`}>
+                    {field.label || field.key}{field.required ? ' *' : ''}
+                  </label>
+                  {field.description && <p>{field.description}</p>}
+                  <textarea
+                    id={`custom-${field.key}`}
+                    rows="2"
+                    value={customFields[field.key] == null ? '' : String(customFields[field.key])}
+                    onChange={e => updateCustomField(field.key, e.target.value)}
+                    required={Boolean(field.required)}
+                  />
+                </div>
+              ))}
+            </section>
+          )}
 
           {error && (
             <div className={styles.error}>

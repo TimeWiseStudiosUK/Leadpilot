@@ -21,9 +21,66 @@ export async function GET(request) {
   const admin = createAdminClient()
   const { data: lead, error: leadError } = await admin.from("leads").select("id, organization_id").eq("id", leadId).eq("organization_id", membership.organization_id).single()
   if (leadError || lead == null) return NextResponse.json({ error: "Lead not found" }, { status: 404 })
-  const { data: activities, error } = await admin.from("lead_activities").select("*").eq("lead_id", leadId).eq("organization_id", membership.organization_id).order("created_at", { ascending: false })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ activities: activities || [] })
+  const { data: activities, error } = await admin
+    .from("lead_activities")
+    .select("*")
+    .eq("lead_id", leadId)
+    .eq("organization_id", membership.organization_id)
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  const { data: conversations, error: conversationsError } = await admin
+    .from("conversations")
+    .select("id, created_at")
+    .eq("lead_id", leadId)
+    .eq("organization_id", membership.organization_id)
+
+  if (conversationsError) {
+    return NextResponse.json({ error: conversationsError.message }, { status: 500 })
+  }
+
+  const conversationIds = (conversations || []).map(conversation => conversation.id)
+  let conversationActivities = []
+
+  if (conversationIds.length > 0) {
+    const { data: messages, error: messagesError } = await admin
+      .from("messages")
+      .select("conversation_id, role")
+      .in("conversation_id", conversationIds)
+
+    if (messagesError) {
+      return NextResponse.json({ error: messagesError.message }, { status: 500 })
+    }
+
+    const messageCounts = new Map()
+
+    for (const message of messages || []) {
+      messageCounts.set(
+        message.conversation_id,
+        (messageCounts.get(message.conversation_id) || 0) + 1
+      )
+    }
+
+    conversationActivities = (conversations || [])
+      .filter(conversation => messageCounts.has(conversation.id))
+      .map(conversation => ({
+        id: `conversation-${conversation.id}`,
+        activity_type: "AI_CONVERSATION",
+        title: "AI conversation",
+        description: `${messageCounts.get(conversation.id)} messages exchanged with the AI assistant.`,
+        created_at: conversation.created_at,
+      }))
+  }
+
+  const combinedActivities = [
+    ...(activities || []),
+    ...conversationActivities,
+  ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+
+  return NextResponse.json({ activities: combinedActivities })
 }
 
 export async function POST(request) {

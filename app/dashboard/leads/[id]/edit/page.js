@@ -24,6 +24,11 @@ export default function EditLeadPage() {
   })
 
   const [customFields, setCustomFields] = useState([])
+  const [qualificationSettings, setQualificationSettings] = useState({
+    enabledFields: ['name', 'contact', 'enquiry'],
+    requiredFields: ['name', 'contact', 'enquiry'],
+    customFields: [],
+  })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -40,6 +45,22 @@ export default function EditLeadPage() {
 
         const lead = data.lead
         const settings = data.qualificationSettings || {}
+
+        setQualificationSettings({
+          enabledFields: [...new Set([
+            'name',
+            'contact',
+            'enquiry',
+            ...(Array.isArray(settings.enabledFields) ? settings.enabledFields : []),
+            ...(Array.isArray(settings.requiredFields) ? settings.requiredFields : []),
+          ])],
+          requiredFields: Array.isArray(settings.requiredFields)
+            ? settings.requiredFields
+            : ['name', 'contact', 'enquiry'],
+          customFields: Array.isArray(settings.customFields)
+            ? settings.customFields
+            : [],
+        })
 
         setCustomFields(
           Array.isArray(settings.customFields) ? settings.customFields : []
@@ -91,6 +112,23 @@ export default function EditLeadPage() {
     if (!form.name.trim()) {
       setError('Please enter the lead name.')
       return
+    }
+
+    if (!form.email.trim() && !form.phone.trim()) {
+      setError('Please enter a phone number or email address.')
+      return
+    }
+
+    if (!form.enquiry.trim()) {
+      setError('Please enter the enquiry details.')
+      return
+    }
+
+    for (const field of customFields) {
+      if (field.required && !String(form.customFields[field.key] ?? '').trim()) {
+        setError(`Please complete ${field.label || field.key}.`)
+        return
+      }
     }
 
     setSaving(true)
@@ -159,7 +197,6 @@ export default function EditLeadPage() {
                 ['name', 'Name'],
                 ['email', 'Email'],
                 ['phone', 'Phone'],
-                ['location', 'Location'],
               ].map(([key, label]) => (
                 <div className={styles.field} key={key}>
                   <label htmlFor={key}>
@@ -185,31 +222,14 @@ export default function EditLeadPage() {
               </div>
             </div>
 
-            <div className={styles.grid}>
-              {[
-                ['service', 'Service or product'],
-                ['timescale', 'Timescale'],
-                ['budget', 'Budget'],
-                ['quantity', 'Quantity'],
-              ].map(([key, label]) => (
-                <div className={styles.field} key={key}>
-                  <label htmlFor={key}>{label}</label>
-                  <input
-                    id={key}
-                    value={form[key]}
-                    onChange={e => updateField(key, e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-
             <div className={styles.fullField}>
-              <label htmlFor="enquiry">Enquiry details</label>
+              <label htmlFor="enquiry">Enquiry details <span> *</span></label>
               <textarea
                 id="enquiry"
                 rows="5"
                 value={form.enquiry}
                 onChange={e => updateField('enquiry', e.target.value)}
+                required
               />
             </div>
           </section>

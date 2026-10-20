@@ -10,6 +10,7 @@ const activityLabels = {
   EMAIL: 'Email',
   FOLLOW_UP: 'Follow-up',
   AI_ASSESSED: 'AI assessed',
+  AI_CONVERSATION: 'AI conversation',
 }
 
 const activityIcons = {
@@ -20,6 +21,7 @@ const activityIcons = {
   EMAIL: '@',
   FOLLOW_UP: '→',
   AI_ASSESSED: 'AI',
+  AI_CONVERSATION: 'AI',
 }
 
 function formatDate(value) {

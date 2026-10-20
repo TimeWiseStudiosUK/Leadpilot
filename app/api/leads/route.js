@@ -4,6 +4,58 @@ import { createAdminClient } from '../../../lib/supabase/admin'
 import { assessLead } from '../../../lib/ai'
 import { evaluateQualification } from '../../../lib/qualification'
 
+
+export async function GET() {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
+    }
+
+    const { data: membership, error: membershipError } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle()
+
+    if (membershipError || !membership) {
+      return NextResponse.json({ error: 'Organisation not found' }, { status: 403 })
+    }
+
+    const { data: assistant, error: assistantError } = await supabase
+      .from('assistants')
+      .select('qualification_settings')
+      .eq('organization_id', membership.organization_id)
+      .eq('active', true)
+      .limit(1)
+      .maybeSingle()
+
+    if (assistantError || !assistant) {
+      return NextResponse.json({ error: 'No active assistant found' }, { status: 400 })
+    }
+
+    const settings = assistant.qualification_settings || {}
+
+    return NextResponse.json({
+      qualificationSettings: {
+        requiredFields: ['name', 'contact', 'enquiry'],
+        enabledFields: ['name', 'contact', 'enquiry'],
+        customFields: Array.isArray(settings.customFields)
+          ? settings.customFields
+          : [],
+      },
+    })
+  } catch (error) {
+    console.error('Unable to load lead qualification settings:', error)
+    return NextResponse.json({ error: 'Unable to load qualification settings' }, { status: 500 })
+  }
+}
+
 export async function POST(request) {
   try {
     const body = await request.json()
@@ -77,6 +129,45 @@ export async function POST(request) {
         { error: 'No active assistant found' },
         { status: 400 }
       )
+    }
+
+    const settings = assistant.qualification_settings || {}
+    const submittedCustomFields =
+      customFields &&
+      typeof customFields === 'object' &&
+      !Array.isArray(customFields)
+        ? customFields
+        : {}
+
+    if (!email?.trim() && !phone?.trim()) {
+      return NextResponse.json(
+        { error: 'A phone number or email address is required' },
+        { status: 400 }
+      )
+    }
+
+    if (!enquiry?.trim()) {
+      return NextResponse.json(
+        { error: 'Enquiry details are required' },
+        { status: 400 }
+      )
+    }
+
+    const customDefinitions = Array.isArray(settings.customFields)
+      ? settings.customFields
+      : []
+
+    for (const field of customDefinitions) {
+      if (
+        field?.required &&
+        field.key &&
+        !String(submittedCustomFields[field.key] ?? '').trim()
+      ) {
+        return NextResponse.json(
+          { error: `${field.label || field.key} is required` },
+          { status: 400 }
+        )
+      }
     }
 
     const { data: lead, error } = await supabase

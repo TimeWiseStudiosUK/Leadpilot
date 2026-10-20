@@ -1251,3 +1251,161 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Essential qualification cards */
+.employeeCoreGrid {
+display: grid;
+grid-template-columns: repeat(3, minmax(0, 1fr));
+gap: 12px;
+margin: 14px 0 30px;
+}
+
+.employeeCoreCard {
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+gap: 12px;
+min-width: 0;
+min-height: 160px;
+padding: 20px;
+border: 1px solid #343434;
+border-radius: 12px;
+background: #232323;
+box-shadow: none;
+}
+
+.employeeCoreTop {
+display: flex;
+align-items: center;
+justify-content: space-between;
+width: 100%;
+}
+
+.employeeCoreIcon {
+display: inline-flex;
+align-items: center;
+justify-content: flex-start;
+width: auto;
+height: auto;
+padding: 0;
+border: 0;
+border-radius: 0;
+background: transparent;
+color: #315de8;
+font-size: 22px;
+font-weight: 400;
+}
+
+.employeeCoreCheck {
+display: none;
+}
+
+.employeeCoreText {
+flex: 1;
+min-width: 0;
+}
+
+.employeeCoreText strong {
+display: block;
+margin: 0;
+color: #ffffff;
+font-size: 16px;
+font-weight: 600;
+line-height: 1.4;
+}
+
+.employeeCoreText small {
+display: block;
+margin-top: 7px;
+color: #a3a3a3;
+font-size: 13px;
+line-height: 1.5;
+}
+
+.employeeCoreRequired {
+display: flex;
+align-items: center;
+gap: 6px;
+margin-top: auto;
+color: #4b78ff;
+font-size: 12px;
+font-weight: 500;
+}
+
+.employeeCoreRequired span {
+color: #a3a3a3;
+font-weight: 400;
+}
+
+@media (max-width: 900px) {
+.employeeCoreGrid {
+grid-template-columns: 1fr;
+gap: 10px;
+}
+
+.employeeCoreCard {
+min-height: 130px;
+padding: 18px;
+}
+}
+/* Final qualification card styling */
+.employeeCoreGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  margin: 12px 0 28px !important;
+}
+.employeeCoreCard {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+  min-height: 132px !important;
+  padding: 17px !important;
+  border: 1px solid #dfe6f2 !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  color: #25334a !important;
+}
+.employeeCoreTop {
+  display: block !important;
+}
+.employeeCoreIcon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 8px !important;
+  background: #edf2ff !important;
+  color: #315de8 !important;
+  font-size: 19px !important;
+}
+.employeeCoreCheck,
+.employeeCoreRequired {
+  display: none !important;
+}
+.employeeCoreText {
+  min-width: 0 !important;
+}
+.employeeCoreText strong {
+  display: block !important;
+  color: #25334a !important;
+  font-size: 14px !important;
+}
+.employeeCoreText small {
+  display: block !important;
+  margin-top: 5px !important;
+  color: #7d899b !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+@media (max-width: 600px) {
+  .employeeCoreGrid {
+    grid-template-columns: 1fr !important;
+  }
+  .employeeCoreCard {
+    min-height: 0 !important;
+  }
+}

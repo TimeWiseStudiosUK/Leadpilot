@@ -36,6 +36,26 @@ export default async function LeadDetails({ params }) {
 
   if (!lead) notFound()
 
+  let customFieldDefinitions = []
+
+  if (lead.assistant_id) {
+    const { data: assistant } = await supabase
+      .from('assistants')
+      .select('qualification_settings')
+      .eq('id', lead.assistant_id)
+      .eq('organization_id', membership.organization_id)
+      .maybeSingle()
+
+    const definitions = assistant?.qualification_settings?.customFields
+    customFieldDefinitions = Array.isArray(definitions) ? definitions : []
+  }
+
+  const customFieldLabels = new Map(
+    customFieldDefinitions
+      .filter(field => field?.key && field?.label)
+      .map(field => [field.key, field.label])
+  )
+
   const { data: conversations } = await supabase
     .from('conversations')
     .select('id, session_id, created_at')
@@ -101,7 +121,7 @@ export default async function LeadDetails({ params }) {
             <div className="detailList">
               {Object.entries(lead.custom_fields || {}).map(([key, value]) => (
                 <div key={key}>
-                  <small>{key.replace(/_/g, ' ')}</small>
+                  <small>{customFieldLabels.get(key) || key.replace(/_/g, ' ')}</small>
                   <strong>
                     {value == null || value === '' ? 'Not provided' : String(value)}
                   </strong>

@@ -24,7 +24,19 @@ export async function POST(request) {
     const result=await runLeadPilot({assistant,history:previous||[],message:message.trim()})
     const ins=await admin.from('messages').insert([{conversation_id:conversation.id,role:'user',content:message.trim()},{conversation_id:conversation.id,role:'assistant',content:result.reply}]); if(ins.error)throw ins.error
     const lead=result.lead
-    if(lead.name||lead.email||lead.phone||lead.service||lead.timescale||lead.enquiry||lead.location||lead.budget||lead.quantity||lead.custom_fields?.length){
+    const hasCustomFieldData = Array.isArray(lead.custom_fields)
+      ? lead.custom_fields.some(field =>
+          field?.key && field?.value != null && String(field.value).trim() !== ''
+        )
+      : Boolean(
+          lead.custom_fields &&
+          typeof lead.custom_fields === 'object' &&
+          Object.values(lead.custom_fields).some(
+            value => value != null && String(value).trim() !== ''
+          )
+        )
+
+    if(lead.name||lead.email||lead.phone||lead.service||lead.timescale||lead.enquiry||lead.location||lead.budget||lead.quantity||hasCustomFieldData){
       let existingLead=null
 
       if(conversation.lead_id){
@@ -38,15 +50,18 @@ export async function POST(request) {
         existingLead=existing.data
       }
 
-      const name = lead.name ?? existingLead?.name ?? null
-      const email = lead.email ?? existingLead?.email ?? null
-      const phone = lead.phone ?? existingLead?.phone ?? null
-      const location = lead.location ?? existingLead?.location ?? null
-      const service = lead.service ?? existingLead?.service ?? null
-      const timescale = lead.timescale ?? existingLead?.timescale ?? null
-      const budget = lead.budget ?? existingLead?.budget ?? null
-      const quantity = lead.quantity ?? existingLead?.quantity ?? null
-      const enquiry = lead.enquiry ?? existingLead?.enquiry ?? null
+      const keepExisting = value =>
+        value != null && String(value).trim() !== '' ? value : null
+
+      const name = keepExisting(lead.name) ?? existingLead?.name ?? null
+      const email = keepExisting(lead.email) ?? existingLead?.email ?? null
+      const phone = keepExisting(lead.phone) ?? existingLead?.phone ?? null
+      const location = keepExisting(lead.location) ?? existingLead?.location ?? null
+      const service = keepExisting(lead.service) ?? existingLead?.service ?? null
+      const timescale = keepExisting(lead.timescale) ?? existingLead?.timescale ?? null
+      const budget = keepExisting(lead.budget) ?? existingLead?.budget ?? null
+      const quantity = keepExisting(lead.quantity) ?? existingLead?.quantity ?? null
+      const enquiry = keepExisting(lead.enquiry) ?? existingLead?.enquiry ?? null
 
       const existingCustomFields =
         existingLead?.custom_fields &&
@@ -57,11 +72,24 @@ export async function POST(request) {
 
       const incomingCustomFields = Array.isArray(lead.custom_fields)
         ? lead.custom_fields.reduce((acc, field) => {
-            if(field?.key && field?.value){
-              acc[field.key]=field.value
+            if (
+              field?.key &&
+              field?.value != null &&
+              String(field.value).trim() !== ''
+            ) {
+              acc[field.key] = field.value
             }
             return acc
           }, {})
+        : lead.custom_fields &&
+          typeof lead.custom_fields === 'object' &&
+          !Array.isArray(lead.custom_fields)
+        ? Object.fromEntries(
+            Object.entries(lead.custom_fields).filter(
+              ([key, value]) =>
+                key && value != null && String(value).trim() !== ''
+            )
+          )
         : {}
 
       const customFields = {
@@ -104,7 +132,7 @@ export async function POST(request) {
         custom_fields:customFields,
         summary:lead.summary || existingLead?.summary || null,
         score:lead.score ?? existingLead?.score ?? null,
-        ready_to_contact:qualificationResult.readyToContact
+        ready_to_contact:(existingLead?.status || 'NEW') === 'NEW' && qualificationResult.readyToContact
       }
 
       if(conversation.lead_id){

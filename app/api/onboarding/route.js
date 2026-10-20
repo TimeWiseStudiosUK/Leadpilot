@@ -21,7 +21,8 @@ export async function POST(request) {
     areas: (form.areas || '').split('\n').map(x=>x.trim()).filter(Boolean),
     qualification_rules: form.rules || '',
     qualification_settings: form.qualificationSettings || {
-      requiredFields: ['name', 'contact', 'service', 'enquiry'],
+      requiredFields: ['name', 'contact', 'enquiry'],
+      enabledFields: ['name', 'contact', 'enquiry'],
       hotCriteria: '',
       warmCriteria: '',
       readyCriteria: '',

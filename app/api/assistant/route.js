@@ -126,7 +126,8 @@ export async function PATCH(request) {
 
         qualification_settings:
           form.qualificationSettings || {
-            requiredFields: ['name', 'contact', 'service', 'enquiry'],
+            requiredFields: ['name', 'contact', 'enquiry'],
+            enabledFields: ['name', 'contact', 'enquiry'],
             hotCriteria: '',
             warmCriteria: '',
             readyCriteria: '',

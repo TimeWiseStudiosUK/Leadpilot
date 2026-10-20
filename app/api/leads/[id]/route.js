@@ -145,7 +145,10 @@ export async function PATCH(request, { params }) {
   const action = body.action
 
   if (action === 'edit') {
-    const name = normalise(body.name)
+    const name = normalise(Object.prototype.hasOwnProperty.call(body, 'name') ? body.name : existingLead.name)
+    const email = normalise(Object.prototype.hasOwnProperty.call(body, 'email') ? body.email : existingLead.email)
+    const phone = normalise(Object.prototype.hasOwnProperty.call(body, 'phone') ? body.phone : existingLead.phone)
+    const enquiry = normalise(Object.prototype.hasOwnProperty.call(body, 'enquiry') ? body.enquiry : existingLead.enquiry)
 
     if (!name) {
       return Response.json(
@@ -154,28 +157,105 @@ export async function PATCH(request, { params }) {
       )
     }
 
+    if (!email && !phone) {
+      return Response.json(
+        { error: 'A phone number or email address is required' },
+        { status: 400 }
+      )
+    }
+
+    if (!enquiry) {
+      return Response.json(
+        { error: 'Enquiry details are required' },
+        { status: 400 }
+      )
+    }
+
+    const {
+      data: assistantForValidation,
+      error: assistantSettingsError,
+    } = await admin
+      .from("assistants")
+      .select("qualification_settings")
+      .eq("id", existingLead.assistant_id)
+      .eq("organization_id", membership.organization_id)
+      .maybeSingle()
+
+    if (assistantSettingsError || !assistantForValidation) {
+      console.error("Unable to load assistant qualification settings:", assistantSettingsError)
+      return Response.json(
+        { error: "Unable to load qualification settings. Please try again." },
+        { status: 500 }
+      )
+    }
+
+    const settings = assistantForValidation.qualification_settings || {}
+    const standardValues = {
+      location: normalise(Object.prototype.hasOwnProperty.call(body, 'location') ? body.location : existingLead.location),
+      service: normalise(Object.prototype.hasOwnProperty.call(body, 'service') ? body.service : existingLead.service),
+      timescale: normalise(Object.prototype.hasOwnProperty.call(body, 'timescale') ? body.timescale : existingLead.timescale),
+      budget: normalise(Object.prototype.hasOwnProperty.call(body, 'budget') ? body.budget : existingLead.budget),
+      quantity: normalise(Object.prototype.hasOwnProperty.call(body, 'quantity') ? body.quantity : existingLead.quantity),
+    }
+
+    const submittedCustomFields =
+      body.customFields &&
+      typeof body.customFields === 'object' &&
+      !Array.isArray(body.customFields)
+        ? body.customFields
+        : {}
+
+    const existingCustomFields =
+      existingLead.custom_fields &&
+      typeof existingLead.custom_fields === 'object' &&
+      !Array.isArray(existingLead.custom_fields)
+        ? existingLead.custom_fields
+        : {}
+
+    const mergedCustomFields = {
+      ...existingCustomFields,
+      ...submittedCustomFields,
+    }
+
+    const customDefinitions = Array.isArray(settings.customFields)
+      ? settings.customFields
+      : []
+
+    for (const field of customDefinitions) {
+      if (
+        field?.required &&
+        field.key &&
+        !normalise(mergedCustomFields[field.key])
+      ) {
+        return Response.json(
+          { error: `${field.label || field.key} is required` },
+          { status: 400 }
+        )
+      }
+    }
+
     const updatedFields = {
       name,
-      email: normalise(body.email) || null,
-      phone: normalise(body.phone) || null,
-      location: normalise(body.location) || null,
-      service: normalise(body.service) || null,
-      timescale: normalise(body.timescale) || null,
-      budget: normalise(body.budget) || null,
-      quantity: normalise(body.quantity) || null,
-      enquiry: normalise(body.enquiry) || null,
-      custom_fields:
-        body.customFields &&
-        typeof body.customFields === 'object' &&
-        !Array.isArray(body.customFields)
-          ? body.customFields
-          : existingLead.custom_fields || {},
+      email: email || null,
+      phone: phone || null,
+      location: standardValues.location || null,
+      service: standardValues.service || null,
+      timescale: standardValues.timescale || null,
+      budget: standardValues.budget || null,
+      quantity: standardValues.quantity || null,
+      enquiry: enquiry || null,
+      custom_fields: mergedCustomFields,
     }
 
     const changedFields = meaningfulFields.filter(field => {
       if (field === 'custom_fields') {
-        return JSON.stringify(existingLead.custom_fields || {}) !==
-          JSON.stringify(updatedFields.custom_fields || {})
+        const sortKeys = value =>
+          Object.fromEntries(
+            Object.entries(value || {}).sort(([a], [b]) => a.localeCompare(b))
+          )
+
+        return JSON.stringify(sortKeys(existingLead.custom_fields)) !==
+          JSON.stringify(sortKeys(updatedFields.custom_fields))
       }
 
       return normalise(existingLead[field]) !== normalise(updatedFields[field])
