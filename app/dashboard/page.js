@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import LogoutButton from '../../components/LogoutButton'
 import { createClient } from '../../lib/supabase/server'
 import LeadAge from '../../components/LeadAge'
 import LeadStatusSelect from '../../components/LeadStatusSelect'
@@ -185,6 +186,7 @@ export default async function Dashboard({ searchParams }) {
           </Link>
 
           <Link href="/onboarding">AI Employee</Link>
+         <LogoutButton />
         </nav>
       </header>
 

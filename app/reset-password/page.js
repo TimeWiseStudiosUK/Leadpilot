@@ -17,23 +17,54 @@ export default function ResetPassword() {
     let active = true
 
     async function establishRecoverySession() {
-      const params = new URLSearchParams(window.location.search)
-      const tokenHash = params.get('token_hash')
-      const type = params.get('type')
+      const url = new URL(window.location.href)
+      const params = url.searchParams
+      const tokenHash = params.get("token_hash")
+      const type = params.get("type")
+      const code = params.get("code")
+      const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""))
+      const accessToken = hashParams.get("access_token")
+      const refreshToken = hashParams.get("refresh_token")
+      const hashType = hashParams.get("type")
 
-      if (tokenHash && type === 'recovery') {
+      if (tokenHash && type === "recovery") {
         const { error: verifyError } = await supabase.auth.verifyOtp({
           token_hash: tokenHash,
-          type: 'recovery'
+          type: "recovery"
         })
-
         if (!active) return
         if (verifyError) {
-          setError('This reset link is invalid or has expired. Please request a new password reset email.')
+          setError("This reset link is invalid or has expired. Please request a new password reset email.")
           return
         }
+        window.history.replaceState({}, document.title, url.pathname)
+        setReady(true)
+        return
+      }
 
-        window.history.replaceState({}, document.title, window.location.pathname)
+      if (code) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+        if (!active) return
+        if (exchangeError) {
+          setError("This reset link is invalid or has expired. Please request a new password reset email.")
+          return
+        }
+        window.history.replaceState({}, document.title, url.pathname)
+        setReady(true)
+        return
+      }
+
+      if (accessToken && refreshToken && hashType === "recovery") {
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        })
+        if (!active) return
+        if (sessionError) {
+          setError("This reset link is invalid or has expired. Please request a new password reset email.")
+          return
+        }
+        window.history.replaceState({}, document.title, url.pathname)
         setReady(true)
         return
       }
@@ -41,10 +72,9 @@ export default function ResetPassword() {
       const { data, error: sessionError } = await supabase.auth.getSession()
       if (!active) return
       if (sessionError || !data.session) {
-        setError('This reset link is invalid or has expired. Please request a new password reset email.')
+        setError("This reset link is invalid or has expired. Please request a new password reset email.")
         return
       }
-
       setReady(true)
     }
 
