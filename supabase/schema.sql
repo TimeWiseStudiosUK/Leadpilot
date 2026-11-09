@@ -147,8 +147,10 @@ create index if not exists lead_follow_ups_pending_idx
   on public.lead_follow_ups (organization_id, due_at asc)
   where status in ('PENDING', 'SNOOZED');
 
-create unique index if not exists lead_follow_ups_one_active_idx
+drop index if exists public.lead_follow_ups_one_active_idx;
+
+create unique index if not exists lead_follow_ups_one_active_ai_idx
   on public.lead_follow_ups (lead_id)
-  where status in ('PENDING', 'SNOOZED');
+  where source = 'AI' and status in ('PENDING', 'SNOOZED');
 
 alter table public.lead_follow_ups enable row level security;

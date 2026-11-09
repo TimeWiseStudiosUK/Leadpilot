@@ -7,6 +7,7 @@ import LeadNotes from '../../../../components/LeadNotes'
 import LeadActivityTimeline from '../../../../components/LeadActivityTimeline'
 import LeadFollowUp from '../../../../components/LeadFollowUp'
 import LeadStatusSelect from '../../../../components/LeadStatusSelect'
+import LeadPageRefresh from '../../../../components/LeadPageRefresh'
 
 export default async function LeadDetails({ params }) {
   const { id } = await params
@@ -84,6 +85,7 @@ export default async function LeadDetails({ params }) {
     <main className="app">
 
       <section className="wrap">
+        <LeadPageRefresh leadId={lead.id} />
         <div style={{ marginBottom: 24 }}>
           <Link href="/dashboard">← Back to leads</Link>
         </div>
@@ -184,108 +186,37 @@ export default async function LeadDetails({ params }) {
           </section>
         </div>
 
-            <section className="card aiHandoverCard">
-              <div className="sectionHeading">
-                <div>
-                  <h2>AI Handover</h2>
-                  <p>Key information and recommended next action for this lead.</p>
-                </div>
-              </div>
-
-              <div className="handoverGrid">
-                <div className="handoverStatus">
-                  <small>Lead score</small>
-                  <strong className={`leadScore ${lead.score ? lead.score.toLowerCase() : 'unscored'}`}>
-                    {lead.score || 'Unscored'}
-                  </strong>
-                </div>
-
-                <div className="handoverStatus">
-                  <small>Ready to contact</small>
-                  <strong className={lead.ready_to_contact ? 'readyYes' : 'readyNo'}>
-                    {lead.ready_to_contact ? 'Yes' : 'Not yet'}
-                  </strong>
-                </div>
-
-                <div className="handoverStatus">
-                  <small>Status</small>
-                  <strong>{lead.status || 'NEW'}</strong>
-                </div>
-              </div>
-
-              <div className="handoverAction">
-                <small>Recommended next action</small>
-                <p>
-                  {lead.status === 'WON'
-                    ? 'Lead converted. No further sales action required.'
-                    : lead.status === 'LOST'
-                      ? 'Lead marked as lost. No further sales action required.'
-                      : lead.ready_to_contact
-                        ? lead.score === 'HOT'
-                          ? 'Contact the customer as soon as possible to discuss the enquiry.'
-                          : 'Contact the customer to discuss the enquiry and agree the next step.'
-                        : 'Continue qualification before contacting the customer.'}
-                </p>
-              </div>
-
-              {lead.ready_to_contact && lead.status !== 'WON' && lead.status !== 'LOST' && (
-                <div className="contactActions">
-                  <div>
-                    <small>Contact customer</small>
-                    <p>Take the next step with this lead.</p>
-                  </div>
-
-                  <div className="contactActionButtons">
-                    {lead.phone && (
-                      <a className="contactButton callButton" href={`tel:${lead.phone}`}>
-                        Call
-                      </a>
-                    )}
-
-                    {lead.email && (
-                      <a
-                        className="contactButton emailButton"
-                        href={`mailto:${lead.email}`}
-                      >
-                        Email
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
-            </section>
-
-            <LeadFollowUp leadId={lead.id} />
+            <LeadFollowUp lead={lead} />
 
       <LeadActivityTimeline leadId={lead.id} />
 
             <div className="leadNotesSpacing"><LeadNotes leadId={lead.id} /></div>
 
 <section className="card conversationCard">
-          <div className="sectionHeading">
-            <div>
-              <h2>Conversation history</h2>
-              <p>The complete conversation between the customer and AI Sales Assistant.</p>
-            </div>
-          </div>
+          <details className="leadSectionDisclosure" open>
+            <summary>
+              <span><strong>AI Conversations</strong><small>Previous conversations between customers and the AI Sales Assistant.</small></span>
+              <span className="leadDisclosureHint">{messages.length} messages</span>
+            </summary>
 
-          {messages.length === 0 ? (
-            <p>No conversation messages found for this lead.</p>
-          ) : (
-            <div className="conversationHistory">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`message ${message.role === 'user' ? 'customer' : 'assistant'}`}
-                >
-                  <small>
-                    {message.role === 'user' ? 'Customer' : 'AI Sales Assistant'}
-                  </small>
-                  <p>{message.content}</p>
-                </div>
-              ))}
-            </div>
-          )}
+            {messages.length === 0 ? (
+              <p>No AI conversation messages found for this lead.</p>
+            ) : (
+              <div className="conversationHistory leadScrollablePanel" aria-label="AI conversation history">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`message ${message.role === 'user' ? 'customer' : 'assistant'}`}
+                  >
+                    <small>
+                      {message.role === 'user' ? 'Customer' : 'AI Sales Assistant'}
+                    </small>
+                    <p>{message.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </details>
         </section>
       </section>
     </main>

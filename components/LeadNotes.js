@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { notifyLeadDataChanged } from '../lib/lead-refresh'
 
 export default function LeadNotes({ leadId }) {
   const [notes, setNotes] = useState([])
@@ -67,6 +68,7 @@ export default function LeadNotes({ leadId }) {
       }
 
       setNote('')
+      notifyLeadDataChanged(leadId)
     } catch (err) {
       console.error(err)
       setError('Unable to save note. Please try again.')
@@ -124,15 +126,15 @@ export default function LeadNotes({ leadId }) {
         )}
       </div>
 
-      <div>
-        <h3 style={{ marginBottom: 14 }}>Note history</h3>
+      <details className="leadSectionDisclosure" open>
+        <summary><span>Note history</span><span className="leadDisclosureHint">{notes.length} entries</span></summary>
 
         {loading ? (
           <p>Loading notes...</p>
         ) : notes.length === 0 ? (
           <p>No notes have been added yet.</p>
         ) : (
-          <div>
+          <div className="notesHistoryScroll">
             {notes.map((item) => (
               <div
                 key={item.id}
@@ -164,7 +166,7 @@ export default function LeadNotes({ leadId }) {
             ))}
           </div>
         )}
-      </div>
+      </details>
     </section>
   )
 }

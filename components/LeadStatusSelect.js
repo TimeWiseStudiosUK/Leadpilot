@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { notifyLeadDataChanged } from '../lib/lead-refresh'
 
 const statuses = ['NEW', 'CONTACTED', 'WON', 'LOST']
 
@@ -13,15 +13,17 @@ const styles = {
 }
 
 export default function LeadStatusSelect({ leadId, status, initialStatus }) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
   const startingStatus = status || initialStatus || 'NEW'
   const [saving, setSaving] = useState(false)
   const [value, setValue] = useState(startingStatus)
 
+  useEffect(() => {
+    setValue(startingStatus)
+  }, [startingStatus])
+
   async function handleChange(event) {
     const nextStatus = event.target.value
+    const previousStatus = value
     setValue(nextStatus)
     setSaving(true)
 
@@ -38,11 +40,10 @@ export default function LeadStatusSelect({ leadId, status, initialStatus }) {
         throw new Error(data.error || 'Unable to update status')
       }
 
-      router.replace(`${pathname}?${searchParams.toString()}`)
-      router.refresh()
+      notifyLeadDataChanged(leadId)
     } catch (error) {
       console.error(error)
-      setValue(startingStatus)
+      setValue(previousStatus)
       alert(error.message)
     } finally {
       setSaving(false)
@@ -54,25 +55,25 @@ export default function LeadStatusSelect({ leadId, status, initialStatus }) {
   return (
     <span onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()}>
       <select
-      value={value}
-      onChange={handleChange}
-      disabled={saving}
-      aria-label="Lead status"
-      style={{
-        appearance: 'none',
-        WebkitAppearance: 'none',
-        padding: '5px 24px 5px 9px',
-        border: `1px solid ${style.border}`,
-        borderRadius: 999,
-        backgroundColor: style.background,
-        color: style.color,
-        fontSize: 12,
-        fontWeight: 700,
-        cursor: saving ? 'wait' : 'pointer',
-        opacity: saving ? 0.65 : 1,
-        minWidth: 96,
-      }}
-    >
+        value={value}
+        onChange={handleChange}
+        disabled={saving}
+        aria-label="Lead status"
+        style={{
+          appearance: 'none',
+          WebkitAppearance: 'none',
+          padding: '5px 24px 5px 9px',
+          border: `1px solid ${style.border}`,
+          borderRadius: 999,
+          backgroundColor: style.background,
+          color: style.color,
+          fontSize: 12,
+          fontWeight: 700,
+          cursor: saving ? 'wait' : 'pointer',
+          opacity: saving ? 0.65 : 1,
+          minWidth: 96,
+        }}
+      >
         {statuses.map((item) => (
           <option key={item} value={item}>
             {item}

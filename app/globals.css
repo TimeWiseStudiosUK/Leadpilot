@@ -1553,3 +1553,190 @@ padding: 18px;
     flex:0 0 15px;
   }
 }
+
+
+/* Unified AI handover and follow-up management */
+.unifiedFollowUpCard { margin-top: 24px; }
+.unifiedFollowUpHeaderActions { display: flex; flex-wrap: wrap; gap: 10px; }
+.unifiedHandoverGrid { margin-top: 0 !important; }
+.manualFollowUpForm { margin-top: 22px; padding: 20px; border: 1px solid #dfe4eb; border-radius: 12px; background: #fafbfc; }
+.manualFollowUpFormHeading, .followUpListHeading, .unifiedFollowUpItemTop { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.manualFollowUpFormHeading h3, .followUpListHeading h3 { margin: 0; font-size: 17px; }
+.manualFollowUpFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.manualFollowUpFields label { display: flex; flex-direction: column; gap: 7px; color: #526071; font-size: 13px; font-weight: 600; }
+.manualFollowUpFields input, .manualFollowUpFields select, .manualFollowUpFields textarea { width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid #d7dce5; border-radius: 8px; background: #fff; color: #263445; font: inherit; font-weight: 400; }
+.manualFollowUpWide { grid-column: 1 / -1; }
+.followUpRecommendation { margin-top: 20px; padding: 16px 18px; border-radius: 10px; background: #f5f7fa; }
+.followUpRecommendation p { margin: 8px 0 0; line-height: 1.55; }
+.followUpListHeading { margin: 26px 0 14px; }
+.followUpListHeading span { color: #68758a; font-size: 13px; }
+.unifiedFollowUpList { display: flex; flex-direction: column; gap: 12px; }
+.unifiedFollowUpItem { padding: 18px; border: 1px solid #e3e7ee; border-radius: 11px; background: #fff; }
+.unifiedFollowUpItem.completed, .unifiedFollowUpItem.cancelled { background: #fafbfc; }
+.unifiedFollowUpItemTop h4 { margin: 5px 0 0; font-size: 16px; }
+.followUpSource, .followUpStatusPill { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.followUpSource.ai { background: #eef2ff; color: #4338ca; }
+.followUpSource.manual { background: #edf7f0; color: #267342; }
+.followUpStatusPill.pending { background: #fff7e6; color: #946200; }
+.followUpStatusPill.snoozed { background: #eef2f6; color: #526071; }
+.followUpStatusPill.completed { background: #edf7f0; color: #267342; }
+.followUpStatusPill.cancelled { background: #f2f3f5; color: #68758a; }
+.unifiedFollowUpMeta { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; color: #68758a; font-size: 13px; }
+.unifiedFollowUpReason { margin: 12px 0 0; line-height: 1.55; }
+.unifiedFollowUpMessage { margin-top: 12px; color: #526071; font-size: 13px; }
+.unifiedFollowUpMessage summary { cursor: pointer; font-weight: 600; }
+.unifiedFollowUpMessage p { margin: 8px 0 0; white-space: pre-wrap; line-height: 1.5; }
+@media (max-width: 700px) { .unifiedFollowUpHeaderActions { width: 100%; } .unifiedFollowUpHeaderActions button { flex: 1; } .manualFollowUpFields { grid-template-columns: 1fr; } .manualFollowUpWide { grid-column: auto; } .manualFollowUpForm .followUpActions { flex-direction: column; } .manualFollowUpForm .followUpActions button { width: 100%; } .unifiedFollowUpItem .followUpActions { flex-wrap: wrap; } }
+
+/* Lead detail page: contained history panels and clearer AI handover */
+.unifiedHandoverGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0 20px;
+}
+.unifiedHandoverGrid .handoverStatus {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 15px 16px;
+  border: 1px solid #e3e7ee;
+  border-radius: 11px;
+  background: #fafbfc;
+}
+.unifiedHandoverGrid .handoverStatus small {
+  color: #68758a;
+  font-size: 12px;
+  font-weight: 600;
+}
+.unifiedHandoverGrid .handoverStatus .leadScore {
+  display: inline-flex;
+  padding: 6px 11px;
+}
+.unifiedHandoverGrid .handoverStatus > strong:not(.leadScore) {
+  font-size: 15px;
+  line-height: 1.35;
+}
+.handoverLeadStatus {
+  color: #263445;
+}
+.followUpScrollablePanel,
+.notesHistoryScroll,
+.leadScrollablePanel {
+  max-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd3df transparent;
+  padding-right: 5px;
+}
+.followUpScrollablePanel {
+  max-height: 430px;
+  padding: 2px 6px 8px 2px;
+}
+.followUpHistoryDetails {
+  margin-top: 18px;
+  border: 1px solid #e3e7ee;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+.followUpHistoryDetails > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style-position: inside;
+}
+.followUpHistoryDetails > summary span {
+  color: #778397;
+  font-size: 12px;
+  font-weight: 500;
+}
+.followUpHistoryList {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0 12px 12px;
+  overscroll-behavior: contain;
+}
+.notesHistoryScroll {
+  max-height: 340px;
+  padding-right: 8px;
+}
+.leadActivityCard .activityTimeline {
+  max-height: 390px;
+  overflow-y: auto;
+  padding: 4px 8px 4px 2px;
+  overscroll-behavior: contain;
+}
+.conversationHistory {
+  max-height: 430px;
+  overflow-y: auto;
+  padding: 2px 8px 8px 2px;
+  overscroll-behavior: contain;
+}
+.followUpScrollablePanel::-webkit-scrollbar,
+.followUpHistoryList::-webkit-scrollbar,
+.notesHistoryScroll::-webkit-scrollbar,
+.leadScrollablePanel::-webkit-scrollbar,
+.conversationHistory::-webkit-scrollbar {
+  width: 7px;
+}
+.followUpScrollablePanel::-webkit-scrollbar-thumb,
+.followUpHistoryList::-webkit-scrollbar-thumb,
+.notesHistoryScroll::-webkit-scrollbar-thumb,
+.leadScrollablePanel::-webkit-scrollbar-thumb,
+.conversationHistory::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #cbd3df;
+}
+@media (max-width: 700px) {
+  .unifiedHandoverGrid { grid-template-columns: 1fr; gap: 9px; }
+  .unifiedHandoverGrid .handoverStatus {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .followUpScrollablePanel { max-height: 380px; }
+  .notesHistoryScroll,
+  .leadActivityCard .activityTimeline,
+  .conversationHistory { max-height: 320px; }
+  .followUpHistoryDetails > summary { align-items: flex-start; flex-direction: column; gap: 5px; }
+}
+.leadSectionDisclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  cursor: pointer;
+  list-style-position: inside;
+}
+.leadSectionDisclosure > summary strong {
+  display: inline-block;
+  color: #182235;
+  font-size: 20px;
+}
+.leadSectionDisclosure > summary small {
+  display: block;
+  margin: 5px 0 0 22px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 400;
+}
+.leadDisclosureHint {
+  flex: 0 0 auto;
+  color: #778397;
+  font-size: 12px;
+  font-weight: 500;
+}
+@media (max-width: 700px) {
+  .leadSectionDisclosure > summary { align-items: flex-start; }
+  .leadDisclosureHint { padding-top: 4px; }
+}

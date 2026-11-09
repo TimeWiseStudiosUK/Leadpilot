@@ -41,10 +41,12 @@ export default function LeadActivityTimeline({ leadId }) {
 
     async function loadActivities() {
       try {
-        const response = await fetch('/api/leads/activities?leadId=' + encodeURIComponent(leadId))
+        const response = await fetch('/api/leads/activities?leadId=' + encodeURIComponent(leadId), {
+          cache: 'no-store',
+        })
         const data = await response.json()
 
-        if (response.ok == false) {
+        if (!response.ok) {
           throw new Error(data.error || 'Unable to load activity')
         }
 
@@ -53,31 +55,39 @@ export default function LeadActivityTimeline({ leadId }) {
           setError('')
         }
       } catch (err) {
-        if (active) {
-          setError(err.message || 'Unable to load activity')
-        }
+        if (active) setError(err.message || 'Unable to load activity')
       } finally {
-        if (active) {
-          setLoading(false)
-        }
+        if (active) setLoading(false)
       }
     }
 
+    function handleLeadUpdate(event) {
+      if (event?.detail?.leadId && event.detail.leadId !== leadId) return
+      loadActivities()
+    }
+
+    function handleVisible() {
+      if (document.visibilityState === 'visible') loadActivities()
+    }
+
     loadActivities()
+    window.addEventListener('leadpilot:lead-updated', handleLeadUpdate)
+    document.addEventListener('visibilitychange', handleVisible)
 
     return () => {
       active = false
+      window.removeEventListener('leadpilot:lead-updated', handleLeadUpdate)
+      document.removeEventListener('visibilitychange', handleVisible)
     }
   }, [leadId])
 
   return (
     <section className='card leadActivityCard'>
-      <div className='sectionHeading'>
-        <div>
-          <h2>Activity</h2>
-          <p>A timeline of everything that has happened with this lead.</p>
-        </div>
-      </div>
+      <details className='leadSectionDisclosure' open>
+        <summary>
+          <span><strong>Lead History</strong><small>A chronological record of changes and actions on this lead.</small></span>
+          <span className='leadDisclosureHint'>{activities.length} entries</span>
+        </summary>
 
       {loading && (
         <div className='activityEmpty'>
@@ -98,7 +108,7 @@ export default function LeadActivityTimeline({ leadId }) {
       )}
 
       {loading == false && error == '' && activities.length > 0 && (
-        <div className='activityTimeline'>
+        <div className='activityTimeline leadScrollablePanel'>
           {activities.map((activity) => (
             <div className='activityItem' key={activity.id}>
               <div className='activityIcon'>
@@ -123,6 +133,7 @@ export default function LeadActivityTimeline({ leadId }) {
           ))}
         </div>
       )}
+      </details>
     </section>
   )
 }
