@@ -2,6 +2,7 @@ import Link from 'next/link'
 import LeadActions from '../../../../components/LeadActions'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '../../../../lib/supabase/server'
+import { createAdminClient } from '../../../../lib/supabase/admin'
 import LeadNotes from '../../../../components/LeadNotes'
 import LeadActivityTimeline from '../../../../components/LeadActivityTimeline'
 import LeadFollowUp from '../../../../components/LeadFollowUp'
@@ -20,7 +21,7 @@ export default async function LeadDetails({ params }) {
 
   const { data: membership } = await supabase
     .from('organization_members')
-    .select('organization_id')
+    .select('organization_id, role')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle()
@@ -39,7 +40,8 @@ export default async function LeadDetails({ params }) {
   let customFieldDefinitions = []
 
   if (lead.assistant_id) {
-    const { data: assistant } = await supabase
+    const admin = createAdminClient()
+    const { data: assistant } = await admin
       .from('assistants')
       .select('qualification_settings')
       .eq('id', lead.assistant_id)
@@ -80,18 +82,6 @@ export default async function LeadDetails({ params }) {
 
   return (
     <main className="app">
-      <header className="bar">
-        <div>
-          <strong>LeadPilot</strong>
-          <span>AI Sales Assistant</span>
-        </div>
-
-        <nav>
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/assistant">Assistant</Link>
-          <Link href="/onboarding">Settings</Link>
-        </nav>
-      </header>
 
       <section className="wrap">
         <div style={{ marginBottom: 24 }}>
@@ -113,6 +103,7 @@ export default async function LeadDetails({ params }) {
         <LeadActions
           leadId={lead.id}
           archived={Boolean(lead.archived_at)}
+          role={membership.role}
         />
 
         {Object.keys(lead.custom_fields || {}).length > 0 && (

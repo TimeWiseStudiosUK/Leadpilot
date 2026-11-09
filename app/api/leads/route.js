@@ -27,7 +27,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Organisation not found' }, { status: 403 })
     }
 
-    const { data: assistant, error: assistantError } = await supabase
+    const admin = createAdminClient()
+    const { data: assistant, error: assistantError } = await admin
       .from('assistants')
       .select('qualification_settings')
       .eq('organization_id', membership.organization_id)
@@ -116,7 +117,8 @@ export async function POST(request) {
       )
     }
 
-    const { data: assistant } = await supabase
+    const admin = createAdminClient()
+    const { data: assistant } = await admin
       .from('assistants')
       .select('*')
       .eq('organization_id', membership.organization_id)
@@ -204,8 +206,6 @@ export async function POST(request) {
         { status: 500 }
       )
     }
-
-    const admin = createAdminClient()
 
     await admin
       .from('lead_activities')

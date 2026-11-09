@@ -30,17 +30,6 @@ export default async function ArchivedLeads() {
 
   return (
     <main className="app">
-      <header className="bar">
-        <div>
-          <strong>LeadPilot</strong>
-          <span>Archived Leads</span>
-        </div>
-
-        <nav>
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/onboarding">Settings</Link>
-        </nav>
-      </header>
 
       <section className="wrap">
         <div className="hero">

@@ -46,7 +46,7 @@ export default function SalesManagerPanel() {
   }
 
   return (
-    <section className="salesManagerPanel">
+    <section id="sales-manager" className="salesManagerPanel">
       <div className="salesManagerHeader">
         <div>
           <small>AI SALES MANAGER</small>

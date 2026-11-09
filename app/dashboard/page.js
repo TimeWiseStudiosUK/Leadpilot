@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import LogoutButton from '../../components/LogoutButton'
 import { createClient } from '../../lib/supabase/server'
+import { createAdminClient } from '../../lib/supabase/admin'
 import LeadAge from '../../components/LeadAge'
 import LeadStatusSelect from '../../components/LeadStatusSelect'
 
@@ -18,7 +18,7 @@ export default async function Dashboard({ searchParams }) {
 
   const { data: memberships } = await supabase
     .from('organization_members')
-    .select('organization_id')
+    .select('organization_id, role')
     .eq('user_id', user.id)
     .limit(1)
 
@@ -42,19 +42,21 @@ export default async function Dashboard({ searchParams }) {
 
   const sort = params?.sort === 'oldest' ? 'oldest' : 'newest'
 
+  const admin = createAdminClient()
+
   const [
     { data: org },
     { data: assistant },
   ] = await Promise.all([
-    supabase
+    admin
       .from('organizations')
-      .select('*')
+      .select('name')
       .eq('id', membership.organization_id)
       .single(),
 
-    supabase
+    admin
       .from('assistants')
-      .select('*')
+      .select('active')
       .eq('organization_id', membership.organization_id)
       .limit(1)
       .maybeSingle(),
@@ -166,29 +168,6 @@ export default async function Dashboard({ searchParams }) {
 
   return (
     <main className="app">
-      <header className="bar">
-        <div>
-          <strong>LeadPilot</strong>
-          <span>AI Sales Assistant</span>
-        </div>
-
-        <nav>
-          <Link href="/dashboard">Dashboard</Link>
-
-          <Link
-            href={
-              assistant
-                ? `/assistant/${assistant.public_slug}`
-                : '/onboarding'
-            }
-          >
-            Test assistant
-          </Link>
-
-          <Link href="/onboarding">AI Employee</Link>
-         <LogoutButton />
-        </nav>
-      </header>
 
       <section className="wrap">
         <div className="hero">
@@ -228,7 +207,7 @@ export default async function Dashboard({ searchParams }) {
           </div>
         </section>
 
-        <SalesManagerPanel />
+        {['owner', 'admin'].includes(membership.role) && <SalesManagerPanel />}
 
       <section className="dailyBrief">
           <div className="dailyBriefMain">

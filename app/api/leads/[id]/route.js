@@ -63,7 +63,8 @@ export async function GET(request, { params }) {
   let qualificationSettings = {}
 
   if (lead.assistant_id) {
-    const { data: assistant, error: assistantError } = await supabase
+    const admin = createAdminClient()
+    const { data: assistant, error: assistantError } = await admin
       .from('assistants')
       .select('qualification_settings')
       .eq('id', lead.assistant_id)
@@ -105,15 +106,6 @@ export async function PATCH(request, { params }) {
 
   if (!membership) {
     return Response.json({ error: 'No organization found' }, { status: 403 })
-  }
-
-  const allowedRoles = ['owner', 'admin']
-
-  if (!allowedRoles.includes(membership.role)) {
-    return Response.json(
-      { error: 'You do not have permission to edit this lead' },
-      { status: 403 }
-    )
   }
 
   const admin = createAdminClient()

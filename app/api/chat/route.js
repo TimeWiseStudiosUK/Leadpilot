@@ -44,6 +44,7 @@ export async function POST(request) {
           .from('leads')
           .select('*')
           .eq('id',conversation.lead_id)
+          .eq('organization_id',assistant.organization_id)
           .single()
 
         if(existing.error)throw existing.error
@@ -140,6 +141,7 @@ export async function POST(request) {
           .from('leads')
           .update(payload)
           .eq('id',conversation.lead_id)
+          .eq('organization_id',assistant.organization_id)
 
         if(r.error)throw r.error
       } else {

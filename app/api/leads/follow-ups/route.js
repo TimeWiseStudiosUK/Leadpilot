@@ -150,6 +150,7 @@ export async function POST(request) {
     .from('lead_follow_ups')
     .select('id, status')
     .eq('lead_id', leadId)
+    .eq('organization_id', membership.organization_id)
     .in('status', ['PENDING', 'SNOOZED'])
     .maybeSingle()
 
@@ -276,6 +277,7 @@ export async function PATCH(request) {
     .from('lead_follow_ups')
     .update(update)
     .eq('id', followUpId)
+    .eq('organization_id', membership.organization_id)
     .select('*')
     .single()
 
@@ -421,6 +423,7 @@ export async function PUT(request) {
     .from('lead_follow_ups')
     .select('*')
     .eq('lead_id', leadId)
+    .eq('organization_id', membership.organization_id)
     .in('status', ['PENDING', 'SNOOZED'])
     .maybeSingle()
 

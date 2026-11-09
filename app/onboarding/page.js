@@ -85,7 +85,7 @@ export default function Onboarding() {
 
       const { data: memberships } = await sb
         .from('organization_members')
-        .select('organization_id')
+        .select('organization_id, role')
         .eq('user_id', user.id)
         .limit(1)
 
@@ -94,6 +94,11 @@ export default function Onboarding() {
       if (!membership) {
         setExistingBusiness(false)
         setLoading(false)
+        return
+      }
+
+      if (['owner', 'admin'].includes(membership.role) === false) {
+        router.replace('/dashboard')
         return
       }
 

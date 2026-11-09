@@ -1409,3 +1409,147 @@ padding: 18px;
     min-height: 0 !important;
   }
 }
+
+/* LeadPilot shared dashboard navigation */
+.dashboard-shell{min-height:100vh;background:#f8fafc}
+.dashboard-sidebar{position:fixed;inset:0 auto 0 0;z-index:50;width:252px;display:flex;flex-direction:column;background:#0f172a;color:#e2e8f0;padding:22px 14px;transition:width .2s ease;overflow-y:auto}
+.dashboard-sidebar.is-collapsed{width:76px;padding-left:12px;padding-right:12px}
+.sidebar-brand{display:flex;align-items:center;gap:11px;min-height:46px;padding:0 5px;margin-bottom:28px}
+.sidebar-brand-mark{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border-radius:11px;background:#3b82f6;color:#fff;font-size:21px;font-weight:800}
+.sidebar-brand-copy{min-width:0;flex:1}
+.sidebar-brand-copy strong,.sidebar-brand-copy span{display:block;white-space:nowrap}
+.sidebar-brand-copy strong{font-size:16px;color:#fff}
+.sidebar-brand-copy span{font-size:10px;color:#94a3b8;margin-top:3px}
+.sidebar-collapse{border:0;background:transparent;color:#94a3b8;font-size:25px;cursor:pointer;padding:2px 5px}
+.sidebar-business{flex:0 0 auto;padding:0 12px;margin-bottom:18px;border:0;border-radius:0;color:#94a3b8;font-size:11px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-nav{display:flex;flex-direction:column;gap:4px}
+.sidebar-section-label{padding:15px 12px 7px;color:#718096;font-size:9px;font-weight:800;letter-spacing:.13em}
+.sidebar-link{min-height:42px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:8px;color:#bdc8d8;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;transition:background .15s,color .15s}
+.sidebar-link:hover{background:#1e293b;color:#fff}
+.sidebar-link.active{background:#1d4ed8;color:#fff}
+.sidebar-icon{width:20px;flex:0 0 20px;text-align:center;font-size:17px}
+.sidebar-link-muted{opacity:.85}
+.sidebar-footer{margin-top:auto;padding-top:20px;border-top:1px solid #263449}
+.sidebar-footer button{width:100%;display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:11px 12px;border:0;border-radius:8px;background:transparent;color:#cbd5e1;font-size:12px;font-weight:600;cursor:pointer}
+.sidebar-footer button:hover{background:#1e293b;color:#fff}
+.dashboard-main{min-width:0;margin-left:252px;min-height:100vh;transition:margin-left .2s ease}
+.dashboard-sidebar.is-collapsed~.dashboard-main{margin-left:76px}
+.sidebar-mobile-toggle,.sidebar-overlay{display:none}
+@media(max-width:760px){
+  .dashboard-sidebar{width:252px;transform:translateX(-100%);transition:transform .2s ease}
+  .dashboard-sidebar.mobile-open{transform:translateX(0)}
+  .dashboard-sidebar.is-collapsed{width:252px;padding:22px 14px}
+  .dashboard-sidebar.is-collapsed .sidebar-brand-copy,.dashboard-sidebar.is-collapsed .sidebar-section-label,.dashboard-sidebar.is-collapsed .sidebar-link span:not(.sidebar-icon){display:initial}
+  .dashboard-sidebar.is-collapsed .sidebar-business{display:block}
+  .dashboard-sidebar.is-collapsed .sidebar-collapse{display:none}
+  .dashboard-main,.dashboard-sidebar.is-collapsed~.dashboard-main{margin-left:0}
+  .sidebar-mobile-toggle{display:grid;place-items:center;position:fixed;top:12px;left:12px;z-index:45;width:40px;height:40px;border:1px solid #e2e8f0;border-radius:9px;background:#fff;color:#0f172a;font-size:20px;box-shadow:0 2px 8px rgba(15,23,42,.08)}
+  .sidebar-overlay{display:block;position:fixed;inset:0;z-index:49;border:0;background:rgba(15,23,42,.45)}
+}
+
+/* LeadPilot account settings */
+.settings-page .wrap{max-width:1180px;padding-top:38px;padding-bottom:48px}
+.settings-page .hero{margin-bottom:28px}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+.settings-card{min-width:0}
+.settings-card .panel-head{padding:20px 22px}
+.settings-card .panel-head h2{font-size:16px}
+.settings-card-body{padding:20px 22px}
+.settings-detail{display:flex;flex-direction:column;gap:5px;padding:0 0 15px;margin-bottom:15px;border-bottom:1px solid #edf0f4}
+.settings-detail:last-of-type{margin-bottom:0}
+.settings-detail span{font-size:11px;color:#8490a2}
+.settings-detail strong{font-size:13px;color:#25334a;font-weight:650;overflow-wrap:anywhere}
+.settings-email{overflow-wrap:anywhere}
+.settings-note{font-size:12px;line-height:1.55;color:#7b8799;margin:12px 0 0}
+.settings-link{display:inline-flex;align-items:center;gap:8px;margin-top:18px;color:#315de8;text-decoration:none;font-size:12px;font-weight:700}
+.settings-link:hover{text-decoration:underline}
+.settings-status{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:8px;background:#fff7e8;color:#95620b;font-size:11px;font-weight:700}
+.settings-status-dot{width:7px;height:7px;border-radius:50%;background:#d69b28}
+.settings-description{font-size:12px;line-height:1.6;color:#68768b;margin:15px 0}
+.settings-feature-list{display:grid;gap:14px;margin-top:18px}
+.settings-feature-list>div{display:flex;flex-direction:column;gap:4px}
+.settings-feature-list strong{font-size:12px;color:#344256}
+.settings-feature-list span{font-size:11px;line-height:1.5;color:#8490a2}
+@media(max-width:900px){.settings-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.settings-page .wrap{padding:68px 16px 32px}.settings-card .panel-head,.settings-card-body{padding:17px}}
+
+/* Mobile layout for the All Leads table */
+@media (max-width: 700px) {
+  .leads-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .leads-table .thead,
+  .leads-table .tr {
+    min-width: 760px;
+  }
+
+  .leads-table .thead span:nth-child(4),
+  .leads-table .tr span:nth-child(4) {
+    display: block;
+  }
+}
+
+/* Collapsed sidebar layout refinement */
+
+/* Collapsed sidebar layout refinement */
+@media(min-width:761px){
+  .dashboard-sidebar.is-collapsed{
+    box-sizing:border-box;
+    width:76px;
+    min-width:76px;
+    max-width:76px;
+    padding:20px 8px;
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+  .dashboard-sidebar.is-collapsed .sidebar-brand{
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    min-height:0;
+    padding:0;
+    margin-bottom:24px;
+  }
+  .dashboard-sidebar.is-collapsed .sidebar-brand-mark{
+    flex:0 0 38px;
+  }
+  .dashboard-sidebar.is-collapsed .sidebar-collapse{
+    align-self:center;
+    padding:0;
+    line-height:1;
+  }
+  .dashboard-sidebar.is-collapsed .sidebar-nav{
+    width:100%;
+    align-items:center;
+  }
+  .dashboard-sidebar.is-collapsed .sidebar-section-label{
+    display:none;
+  }
+  .dashboard-sidebar.is-collapsed .sidebar-link{
+    width:100%;
+    min-width:0;
+    justify-content:center;
+    padding:0;
+    gap:0;
+  }
+  .dashboard-sidebar.is-collapsed .sidebar-icon{
+    margin:0;
+  }
+  .dashboard-sidebar.is-collapsed .sidebar-footer{
+    width:100%;
+    overflow:hidden;
+  }
+  .dashboard-sidebar.is-collapsed .sidebar-footer button{
+    width:100%;
+    justify-content:center;
+    padding:11px 0;
+    gap:0;
+    font-size:0;
+  }
+  .dashboard-sidebar.is-collapsed .sidebar-footer button span{display:none}\n  .dashboard-sidebar.is-collapsed .sidebar-footer button svg{
+    flex:0 0 15px;
+  }
+}

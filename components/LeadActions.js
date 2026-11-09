@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function LeadActions({ leadId, archived = false }) {
+export default function LeadActions({ leadId, archived = false, role }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
 
@@ -120,6 +120,7 @@ export default function LeadActions({ leadId, archived = false }) {
         {busy ? 'Working...' : archived ? 'Restore Lead' : 'Archive Lead'}
       </button>
 
+      {role === "owner" && (
       <button
         type="button"
         onClick={deleteLead}
@@ -137,6 +138,7 @@ export default function LeadActions({ leadId, archived = false }) {
       >
         Delete Lead
       </button>
+      )}
     </div>
   )
 }

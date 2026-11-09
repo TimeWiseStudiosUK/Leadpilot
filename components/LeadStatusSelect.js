@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 const statuses = ['NEW', 'CONTACTED', 'WON', 'LOST']
 
@@ -15,6 +15,7 @@ const styles = {
 export default function LeadStatusSelect({ leadId, status, initialStatus }) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const startingStatus = status || initialStatus || 'NEW'
   const [saving, setSaving] = useState(false)
   const [value, setValue] = useState(startingStatus)
@@ -37,7 +38,7 @@ export default function LeadStatusSelect({ leadId, status, initialStatus }) {
         throw new Error(data.error || 'Unable to update status')
       }
 
-      router.replace(`/dashboard?${searchParams.toString()}`)
+      router.replace(`${pathname}?${searchParams.toString()}`)
       router.refresh()
     } catch (error) {
       console.error(error)
